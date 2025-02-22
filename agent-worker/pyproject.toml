@@ -1,0 +1,28 @@
+[tool.pdm.build]
+includes = []
+
+[build-system]
+requires = ["pdm-backend", "torch", "setuptools", "wheel"]
+build-backend = "pdm.backend"
+
+
+[project]
+authors = [{ name = "Johannes Naylor", email = "jonaylor89@gmail.com" }]
+requires-python = "<3.12,>=3.9"
+dependencies = [
+    "langchain<1.0.0,>=0.0.345",
+    "python-dotenv<2.0.0,>=1.0.0",
+    "numexpr<3.0.0,>=2.8.7",
+    "pydantic<3.0.0,>=2.5.2",
+    "numpy<2.0.0,>=1.26.2",
+    "langchain-anthropic>=0.3.1",
+    "langgraph>=0.2.60",
+    "tavily-python>=0.5.0",
+    "langgraph-checkpoint-sqlite>=2.0.1",
+    "langchain-community>=0.3.13",
+    "librosa>=0.10.2.post1",
+]
+name = "music-analysis-agent"
+version = "0.1.0"
+description = ""
+readme = "README.md"
