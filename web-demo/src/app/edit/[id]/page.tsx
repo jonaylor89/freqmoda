@@ -4,11 +4,13 @@ import { useParams, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import tracksData from "@/data/tracks.json";
 import WaveformVisualizer from '@/components/WaveformVisualizer';
+import VolumeControl from '@/components/VolumeControl';
 
 export default function EditTrack() {
   const params = useParams();
   const router = useRouter();
   const [duration, setDuration] = useState("0:00");
+  const [volume, setVolume] = useState(1);
 
   useEffect(() => {
     return () => {
@@ -58,6 +60,8 @@ export default function EditTrack() {
               }}
               isPlaying={isPlaying}
               onPlayPause={togglePlayback}
+              volume={volume}
+              onVolumeChange={setVolume}
             />
           </div>
 
@@ -73,9 +77,7 @@ export default function EditTrack() {
               <span className="font-mono">{duration}</span>
             </div>
             <div className="flex items-center gap-2">
-              <button className="p-2 rounded-lg bg-[#B4A5FF]/10 text-[#B4A5FF]">
-                <SpeakerIcon />
-              </button>
+              <VolumeControl volume={volume} onVolumeChange={setVolume} />
               <button className="p-2 rounded-lg bg-[#B4A5FF]/10 text-[#B4A5FF]">
                 <FullscreenIcon />
               </button>
@@ -131,12 +133,6 @@ const PlayIcon = () => (
 const PauseIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
     <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
-  </svg>
-);
-
-const SpeakerIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z" />
   </svg>
 );
 

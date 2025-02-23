@@ -9,6 +9,8 @@ interface WaveformVisualizerProps {
   onPlaybackReady?: (duration: number) => void;
   isPlaying?: boolean;
   onPlayPause?: () => void;
+  volume: number;
+  onVolumeChange: (volume: number) => void;
 }
 
 // Add a LoadingSpinner component
@@ -16,12 +18,14 @@ const LoadingSpinner = () => (
   <div className="animate-spin rounded-full h-8 w-8 border-2 border-[#B4A5FF] border-t-transparent" />
 );
 
-export default function WaveformVisualizer({ 
-  audioUrl, 
-  onPlaybackReady,
-  isPlaying,
-  onPlayPause 
-}: WaveformVisualizerProps) {
+export default function WaveformVisualizer(props: WaveformVisualizerProps) {
+  const { 
+    audioUrl, 
+    onPlaybackReady, 
+    isPlaying, 
+    onPlayPause,
+    volume  } = props;
+
   const containerRef = useRef<HTMLDivElement>(null);
   const wavesurferRef = useRef<WaveSurfer | null>(null);
   const [loading, setLoading] = useState(true);
@@ -120,6 +124,13 @@ export default function WaveformVisualizer({
       wavesurfer.pause();
     }
   }, [isPlaying]);
+
+  // Add volume effect
+  useEffect(() => {
+    const wavesurfer = wavesurferRef.current;
+    if (!wavesurfer) return;
+    wavesurfer.setVolume(volume);
+  }, [volume]);
 
   const handleTimelineClick = (e: React.MouseEvent<HTMLDivElement>) => {
     const wavesurfer = wavesurferRef.current;
