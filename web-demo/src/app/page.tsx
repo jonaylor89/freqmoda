@@ -13,19 +13,12 @@ export default function Home() {
           <h1 className="text-5xl font-bold animate-gradient-shine from-[#B4A5FF] to-[#7C66FF]">
             Your Tracks
           </h1>
-          <button className="text-[#B4A5FF] flex items-center gap-2 px-6 py-3 rounded-xl border border-[#B4A5FF]/20 hover:border-[#B4A5FF]/40 transition-all hover:scale-105 bg-[#B4A5FF]/5 backdrop-blur-sm">
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              className="opacity-70"
-            >
-              <path
-                d="M20 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6C22 4.9 21.1 4 20 4ZM20 18H4V8L12 13L20 8V18ZM12 11L4 6H20L12 11Z"
-                fill="currentColor"
-              />
+          <button 
+            onClick={() => router.push('/waitlist')}
+            className="text-[#B4A5FF] flex items-center gap-2 px-6 py-3 rounded-xl border border-[#B4A5FF]/20 hover:border-[#B4A5FF]/40 transition-all hover:scale-105 bg-[#B4A5FF]/5 backdrop-blur-sm"
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" className="opacity-70">
+              <path d="M20 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6C22 4.9 21.1 4 20 4ZM20 18H4V8L12 13L20 8V18ZM12 11L4 6H20L12 11Z"/>
             </svg>
             Join the waiting list
           </button>
