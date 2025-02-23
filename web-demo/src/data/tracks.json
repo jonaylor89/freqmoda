@@ -2,9 +2,22 @@
   "tracks": [
     {
       "id": 1,
-      "name": "Yung Nudi",
+      "name": "young nudy unreleased mix part. 3",
       "audioUrl": "/api/audio/youtube_HlIzMBs9m8w_audio.mp3",
       "duration": "32:57"
+    },
+    {
+      "id": 2,
+      "name": "young nudy unreleased mix part. 4",
+      "audioUrl": "/api/audio/youtube_O0wgpi7wFUo_audio.mp3",
+      "duration": "31:38"
+    },
+    {
+      "id": 3,
+      "name": "young nudy unreleased mix part. 5",
+      "audioUrl": "/api/audio/youtube_JrK81SjUBik_audio.mp3",
+      "duration": "34:00"
     }
   ]
-} 
+}
+
