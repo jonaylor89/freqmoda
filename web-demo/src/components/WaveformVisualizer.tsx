@@ -27,12 +27,11 @@ export default function WaveformVisualizer({
   const wavesurferRef = useRef<WaveSurfer | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
 
   useEffect(() => {
     if (!containerRef.current) return;
-
-    setLoading(true);  // Reset loading state on each load
-    setError(null);    // Clear any previous errors
 
     const wavesurfer = WaveSurfer.create({
       container: containerRef.current,
@@ -40,22 +39,26 @@ export default function WaveformVisualizer({
       progressColor: '#7C66FF',
       height: 160,
       normalize: true,
-      backend: 'WebAudio', // Changed back to WebAudio
-      cursorWidth: 2,
+      backend: 'WebAudio',
+      cursorWidth: 0,
       barWidth: 3,
       barGap: 2,
       minPxPerSec: 30,
       maxCanvasWidth: 4000,
-      interact: true,
-      dragToSeek: true,
+      interact: false,
+      dragToSeek: false,
+      scrollParent: false, // Disable scrolling
     });
 
-    console.log('Loading audio from:', audioUrl);
+    // Add time update handler
+    wavesurfer.on('timeupdate', (currentTime) => {
+      setCurrentTime(currentTime);
+    });
 
     wavesurfer.on('ready', () => {
-      console.log('WaveSurfer ready');
       setLoading(false);
-      setError(null);  // Clear any errors on successful load
+      setError(null);
+      setDuration(wavesurfer.getDuration());
       if (onPlaybackReady) {
         onPlaybackReady(wavesurfer.getDuration());
       }
@@ -105,9 +108,119 @@ export default function WaveformVisualizer({
     }
   }, [isPlaying]);
 
+  const handleTimelineClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    const wavesurfer = wavesurferRef.current;
+    if (!wavesurfer || loading) return;
+
+    const timeline = e.currentTarget;
+    const rect = timeline.getBoundingClientRect();
+    const relativeX = e.clientX - rect.left;
+    const percentage = relativeX / rect.width;
+    const seekTime = duration * percentage;
+    
+    wavesurfer.seekTo(percentage);
+    setCurrentTime(seekTime);
+  };
+
+  const formatTime = (time: number) => {
+    const minutes = Math.floor(time / 60);
+    const seconds = Math.floor(time % 60);
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  };
+
   return (
-    <div className="w-full rounded-xl bg-[#13111C]/50 relative">
-      <div ref={containerRef} className="h-40" />
+    <div className="w-full rounded-xl bg-[#13111C]/50 relative space-y-2 overflow-hidden">
+      <div 
+        ref={containerRef} 
+        className="h-40" 
+        style={{ 
+          overflow: 'hidden',
+          touchAction: 'none', // Disable touch scrolling
+          pointerEvents: isPlaying ? 'none' : 'auto' // Disable interaction while playing
+        }} 
+      />
+      
+      {/* Enhanced Timeline with Mini Waveform */}
+      <div className="px-4 pb-4">
+        <div 
+          className="h-12 bg-[#13111C] rounded-xl cursor-pointer relative group overflow-hidden"
+          onClick={handleTimelineClick}
+          onMouseMove={(e) => {
+            const rect = e.currentTarget.getBoundingClientRect();
+            const percentage = ((e.clientX - rect.left) / rect.width) * 100;
+            e.currentTarget.style.setProperty('--hover-position', `${percentage}%`);
+          }}
+        >
+          {/* Mini waveform background */}
+          <div 
+            className="absolute inset-0 opacity-30"
+            style={{
+              backgroundImage: 'repeating-linear-gradient(90deg, #B4A5FF 0px, #B4A5FF 2px, transparent 2px, transparent 4px)',
+              backgroundSize: '100% 100%',
+              maskImage: 'linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent)',
+              WebkitMaskImage: 'linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent)',
+            }}
+          />
+
+          {/* Progress gradient overlay */}
+          <div 
+            className="absolute inset-y-0 left-0 bg-gradient-to-r from-[#7C66FF] to-[#B4A5FF]"
+            style={{ 
+              width: `${(currentTime / duration) * 100}%`,
+              opacity: 0.3,
+            }}
+          />
+
+          {/* Active progress bar */}
+          <div 
+            className="absolute bottom-0 left-0 h-1.5 bg-gradient-to-r from-[#7C66FF] to-[#B4A5FF]"
+            style={{ 
+              width: `${(currentTime / duration) * 100}%`,
+              boxShadow: '0 0 20px rgba(124, 102, 255, 0.5)',
+            }}
+          />
+
+          {/* Hover indicator */}
+          <div 
+            className="absolute inset-y-0 w-0.5 bg-white opacity-0 group-hover:opacity-50 transition-opacity"
+            style={{ 
+              left: 'var(--hover-position, 0%)',
+              boxShadow: '0 0 10px rgba(255, 255, 255, 0.5)',
+            }}
+          />
+
+          {/* Time marker */}
+          <div 
+            className="absolute bottom-0 h-12 w-1 bg-white"
+            style={{ 
+              left: `${(currentTime / duration) * 100}%`,
+              transform: 'translateX(-50%)',
+              opacity: 0.8,
+              boxShadow: '0 0 15px rgba(255, 255, 255, 0.3)',
+            }}
+          >
+            {/* Marker glow */}
+            <div 
+              className="absolute bottom-0 w-3 h-3 -translate-x-1/2 rounded-full"
+              style={{
+                background: 'radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 70%)',
+                filter: 'blur(2px)',
+              }}
+            />
+          </div>
+        </div>
+
+        {/* Time display */}
+        <div className="flex justify-between mt-3">
+          <div className="text-sm font-mono bg-[#13111C] px-3 py-1.5 rounded-lg text-[#B4A5FF] shadow-lg">
+            {formatTime(currentTime)}
+          </div>
+          <div className="text-sm font-mono bg-[#13111C] px-3 py-1.5 rounded-lg text-[#B4A5FF] shadow-lg">
+            {formatTime(duration)}
+          </div>
+        </div>
+      </div>
+
       {(loading || error) && (
         <div className="absolute inset-0 flex items-center justify-center bg-black/20 backdrop-blur-sm">
           {loading ? (
