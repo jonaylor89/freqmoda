@@ -3,8 +3,8 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #13111C;
+  --foreground: #ffffff;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -17,5 +17,43 @@
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+@layer base {
+  * {
+    @apply selection:bg-[#B4A5FF]/30 selection:text-white;
+  }
+}
+
+@layer utilities {
+  .backdrop-blur-xl {
+    backdrop-filter: blur(24px);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+.animate-gradient-shine {
+  background: linear-gradient(
+    75deg,
+    var(--tw-gradient-from) 0%,
+    var(--tw-gradient-to) 45%,
+    #ffffff 50%,
+    var(--tw-gradient-to) 55%,
+    var(--tw-gradient-from) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s ease-out forwards;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
 }
