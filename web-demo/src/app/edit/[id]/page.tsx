@@ -1,7 +1,7 @@
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import tracksData from "@/data/tracks.json";
 import WaveformVisualizer from '@/components/WaveformVisualizer';
 
@@ -24,6 +24,12 @@ export default function EditTrack() {
   const togglePlayback = () => {
     setIsPlaying(!isPlaying);
   };
+
+  useEffect(() => {
+    return () => {
+      setIsPlaying(false);
+    };
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#13111C] to-[#191627] text-white p-8">

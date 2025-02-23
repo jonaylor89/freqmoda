@@ -92,7 +92,11 @@ export default function WaveformVisualizer({
     }
 
     return () => {
-      wavesurfer.destroy();
+      if (wavesurfer) {
+        wavesurfer.pause(); // Ensure playback is stopped
+        wavesurfer.destroy();
+        wavesurferRef.current = null; // Clear the ref
+      }
     };
   }, [audioUrl]);
 
