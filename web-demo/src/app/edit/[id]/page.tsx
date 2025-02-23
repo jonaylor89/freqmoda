@@ -1,17 +1,24 @@
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
-import { useRef, useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import tracksData from "@/data/tracks.json";
 import WaveformVisualizer from '@/components/WaveformVisualizer';
 
 export default function EditTrack() {
   const params = useParams();
   const router = useRouter();
+  const [duration, setDuration] = useState("0:00");
+
+  useEffect(() => {
+    return () => {
+      setIsPlaying(false);
+    };
+  }, []);
+
   const track = tracksData.tracks.find(t => t.id === Number(params.id));
   const [isPlaying, setIsPlaying] = useState(false);
   const [isPlaybackReady, setIsPlaybackReady] = useState(false);
-  const [duration, setDuration] = useState("0:00");
 
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
@@ -24,12 +31,6 @@ export default function EditTrack() {
   const togglePlayback = () => {
     setIsPlaying(!isPlaying);
   };
-
-  useEffect(() => {
-    return () => {
-      setIsPlaying(false);
-    };
-  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#13111C] to-[#191627] text-white p-8">
