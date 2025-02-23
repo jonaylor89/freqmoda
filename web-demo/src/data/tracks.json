@@ -3,7 +3,8 @@
     {
       "id": 1,
       "name": "Yung Nudi",
-      "audioUrl": "/api/audio/youtube_HlIzMBs9m8w_audio.mp3"
+      "audioUrl": "/api/audio/youtube_HlIzMBs9m8w_audio.mp3",
+      "duration": "32:57"
     }
   ]
 } 

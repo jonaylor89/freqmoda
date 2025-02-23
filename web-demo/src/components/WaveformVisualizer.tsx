@@ -17,7 +17,6 @@ const LoadingSpinner = () => (
 );
 
 export default function WaveformVisualizer({ 
-  trackId, 
   audioUrl, 
   onPlaybackReady,
   isPlaying,
@@ -46,10 +45,8 @@ export default function WaveformVisualizer({
       barWidth: 3,
       barGap: 2,
       minPxPerSec: 30,
-      maxCanvasWidth: 4000,
       interact: false,
       dragToSeek: false,
-      scrollParent: false, // Disable scrolling
     });
 
     // Add time update handler
