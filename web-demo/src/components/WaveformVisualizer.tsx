@@ -29,6 +29,7 @@ export default function WaveformVisualizer({
   const [error, setError] = useState<string | null>(null);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [showError, setShowError] = useState(false);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -58,6 +59,7 @@ export default function WaveformVisualizer({
     wavesurfer.on('ready', () => {
       setLoading(false);
       setError(null);
+      setShowError(false);
       setDuration(wavesurfer.getDuration());
       if (onPlaybackReady) {
         onPlaybackReady(wavesurfer.getDuration());
@@ -66,12 +68,16 @@ export default function WaveformVisualizer({
 
     wavesurfer.on('error', err => {
       console.error('WaveSurfer error:', err);
-      setError(`Failed to load audio: ${err.message || 'Unknown error'}`);
-      setLoading(false);  // Stop loading on error
+      setTimeout(() => {
+        if (loading) {
+          setError(`Failed to load audio: ${err.message || 'Unknown error'}`);
+          setShowError(true);
+        }
+      }, 1000);
+      setLoading(false);
     });
 
     wavesurfer.on('loading', progress => {
-      console.log(`Loading: ${progress}%`);
       if (progress < 100) {
         setLoading(true);
       }
@@ -80,6 +86,8 @@ export default function WaveformVisualizer({
     try {
       wavesurfer.load(audioUrl);
       wavesurferRef.current = wavesurfer;
+      setError(null);
+      setShowError(false);
 
       // Add click handler for play/pause
       containerRef.current.addEventListener('click', () => {
@@ -87,8 +95,11 @@ export default function WaveformVisualizer({
       });
     } catch (err) {
       console.error('Error loading audio:', err);
-      setError('Failed to load audio');
-      setLoading(false);  // Stop loading on error
+      setTimeout(() => {
+        setError('Failed to load audio');
+        setShowError(true);
+      }, 1000);
+      setLoading(false);
     }
 
     return () => {
@@ -225,11 +236,11 @@ export default function WaveformVisualizer({
         </div>
       </div>
 
-      {(loading || error) && (
+      {(loading || (error && showError)) && (
         <div className="absolute inset-0 flex items-center justify-center bg-black/20 backdrop-blur-sm">
           {loading ? (
             <LoadingSpinner />
-          ) : error ? (
+          ) : error && showError ? (
             <div className="text-red-400">{error}</div>
           ) : null}
         </div>
