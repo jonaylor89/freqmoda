@@ -1,23 +1,15 @@
 'use client';
 
-import React, { useState } from 'react';
-
 interface VolumeControlProps {
   volume: number;
   onVolumeChange: (volume: number) => void;
 }
 
 export default function VolumeControl({ volume, onVolumeChange }: VolumeControlProps) {
-  const [isHovered, setIsHovered] = useState(false);
-
   return (
-    <div 
-      className="relative group"
-      onMouseLeave={() => setIsHovered(false)}
-    >
+    <div className="relative group">
       <button 
         className="p-2 rounded-lg bg-[#B4A5FF]/10 text-[#B4A5FF] hover:bg-[#B4A5FF]/20 transition-all"
-        onMouseEnter={() => setIsHovered(true)}
       >
         {volume === 0 ? (
           <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
@@ -36,7 +28,6 @@ export default function VolumeControl({ volume, onVolumeChange }: VolumeControlP
 
       <div 
         className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-32 bg-[#1C1A27] rounded-lg p-3 shadow-xl opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-        onMouseEnter={() => setIsHovered(true)}
       >
         <input
           type="range"
