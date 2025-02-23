@@ -34,14 +34,14 @@ export default function EditTrack() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#13111C] to-[#191627] text-white p-8">
       <div className="max-w-4xl mx-auto">
-        <div className="flex items-center gap-4 mb-8">
+        <div className="flex items-center gap-4 mb-1 py-4">
           <button 
             onClick={() => router.back()}
             className="text-[#B4A5FF] hover:text-white transition-colors"
           >
             ← Back
           </button>
-          <h1 className="text-5xl font-bold bg-gradient-to-r from-[#B4A5FF] to-[#7C66FF] bg-clip-text text-transparent">
+          <h1 className="text-5xl font-bold bg-gradient-to-r from-[#B4A5FF] to-[#7C66FF] bg-clip-text text-transparent leading-relaxed">
             {track.name}
           </h1>
         </div>

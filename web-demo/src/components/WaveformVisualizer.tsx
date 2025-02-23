@@ -30,6 +30,7 @@ export default function WaveformVisualizer({
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [showError, setShowError] = useState(false);
+  const [hoverTime, setHoverTime] = useState<number | null>(null);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -156,15 +157,17 @@ export default function WaveformVisualizer({
       />
       
       {/* Enhanced Timeline with Mini Waveform */}
-      <div className="px-4 pb-4">
+      <div className="px-4 pb-4 pt-6">
         <div 
-          className="h-12 bg-[#13111C] rounded-xl cursor-pointer relative group overflow-hidden"
+          className="h-12 bg-[#13111C] rounded-xl cursor-pointer relative group overflow-visible"
           onClick={handleTimelineClick}
           onMouseMove={(e) => {
             const rect = e.currentTarget.getBoundingClientRect();
-            const percentage = ((e.clientX - rect.left) / rect.width) * 100;
-            e.currentTarget.style.setProperty('--hover-position', `${percentage}%`);
+            const percentage = (e.clientX - rect.left) / rect.width;
+            e.currentTarget.style.setProperty('--hover-position', `${percentage * 100}%`);
+            setHoverTime(duration * percentage);
           }}
+          onMouseLeave={() => setHoverTime(null)}
         >
           {/* Mini waveform background */}
           <div 
@@ -223,6 +226,24 @@ export default function WaveformVisualizer({
               }}
             />
           </div>
+
+          {/* Updated hover time indicator positioning */}
+          {hoverTime !== null && (
+            <div 
+              className="absolute top-0 transform -translate-y-full pointer-events-none z-10"
+              style={{ 
+                left: 'var(--hover-position)',
+                transform: 'translateX(-50%) translateY(-8px)'
+              }}
+            >
+              <div className="bg-[#7C66FF] px-2 py-1 rounded-md shadow-lg text-xs font-mono text-white whitespace-nowrap">
+                {formatTime(hoverTime)}
+              </div>
+              <div 
+                className="w-2 h-2 bg-[#7C66FF] rotate-45 absolute left-1/2 top-full -translate-x-1/2 -translate-y-1/2"
+              />
+            </div>
+          )}
         </div>
 
         {/* Time display */}
