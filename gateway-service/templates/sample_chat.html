@@ -1,0 +1,1217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- SEO Meta Tags -->
+    <title>AI Audio Engineer Demo - {{ sample.title }} | AI Audio Processing</title>
+    <meta name="description" content="Transform {{ sample.title }} using natural language commands. AI Audio Engineer makes audio processing intuitive - just describe what you want and watch your audio transform in real-time.">
+    <meta name="keywords" content="AI audio processing, audio editing, natural language audio, audio transformation, music AI, sound processing, audio effects, AI audio engineer">
+    <meta name="author" content="AI Audio Engineer">
+    <meta name="robots" content="index, follow">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary': '#6366f1',
+                        'primary-dark': '#4f46e5',
+                        'secondary': '#10b981',
+                        'accent': '#f59e0b',
+                        'danger': '#ef4444',
+                        'surface': '#f8fafc',
+                        'surface-dark': '#1e293b'
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-in-out',
+                        'slide-up': 'slideUp 0.3s ease-out',
+                        'pulse-soft': 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'spin-slow': 'spin 3s linear infinite',
+                        'bounce-soft': 'bounce 1s infinite',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0', transform: 'translateY(10px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' }
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(100%)' },
+                            '100%': { transform: 'translateY(0)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Wavesurfer.js -->
+    <script src="https://unpkg.com/wavesurfer.js@7"></script>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+    <!-- PostHog Analytics -->
+    {% if posthog_api_key.is_some() && posthog_host.is_some() %}
+    <script>
+        !(function (t, e) {
+            var o, n, p, r;
+            e.__SV ||
+                ((window.posthog = e),
+                (e._i = []),
+                (e.init = function (i, s, a) {
+                    function g(t, e) {
+                        var o = e.split(".");
+                        2 == o.length && ((t = t[o[0]]), (e = o[1]));
+                        var n = t;
+                        if ("undefined" != typeof n[e])
+                            return (
+                                (n[e] = function () {
+                                    n.push(
+                                        [e].concat(
+                                            Array.prototype.slice.call(
+                                                arguments,
+                                                0,
+                                            ),
+                                        ),
+                                    );
+                                }),
+                                n
+                            );
+                    }
+                    ((p = t.createElement("script")).type =
+                        "text/javascript"),
+                        (p.async = !0),
+                        (p.src = s.api_host + "/static/array.js"),
+                        (r =
+                            t.getElementsByTagName(
+                                "script",
+                            )[0]).parentNode.insertBefore(p, r);
+                    var u = e;
+                    for (
+                        void 0 !== a ? (u = e[a] = []) : (a = "posthog"),
+                            u.people = u.people || [],
+                            u.toString = function (t) {
+                                var e = "posthog";
+                                return (
+                                    "posthog" !== a && (e += "." + a),
+                                    t || (e += " (stub)"),
+                                    e
+                                );
+                            },
+                            u.people.toString = function () {
+                                return u.toString(1) + ".people (stub)";
+                            },
+                            o =
+                                "capture identify alias people.set people.set_once set_config register register_once unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled onFeatureFlags getFeatureFlag getFeatureFlagPayload reloadFeatureFlags group updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures getActiveMatchingSurveys getSurveys onSessionId".split(
+                                    " ",
+                                ),
+                            n = 0;
+                        n < o.length;
+                        n++
+                    )
+                        g(u, o[n]);
+                    e._i.push([i, s, a]);
+                }),
+                (e.__SV = 1));
+        })(document, window.posthog || []);
+        posthog.init("{{ posthog_api_key.as_ref().unwrap() }}", {
+            api_host: "/relay-TVmB",
+            person_profiles: "identified_only",
+        });
+    </script>
+    {% endif %}
+
+    <!-- Custom CSS for specific functionality -->
+    <style>
+        /* Chat scrolling behavior */
+        .chat-messages {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+        }
+        .chat-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+        .chat-messages::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .chat-messages::-webkit-scrollbar-thumb {
+            background-color: rgba(156, 163, 175, 0.5);
+            border-radius: 3px;
+        }
+        .chat-messages::-webkit-scrollbar-thumb:hover {
+            background-color: rgba(156, 163, 175, 0.7);
+        }
+
+        /* Version history panel */
+        .version-panel {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(156, 163, 175, 0.3) transparent;
+        }
+        .version-panel::-webkit-scrollbar {
+            width: 4px;
+        }
+        .version-panel::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .version-panel::-webkit-scrollbar-thumb {
+            background-color: rgba(156, 163, 175, 0.3);
+            border-radius: 2px;
+        }
+
+        /* Smooth transitions */
+        .transition-smooth {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Glass effect */
+        .glass {
+            backdrop-filter: blur(12px);
+            background: rgba(255, 255, 255, 0.85);
+        }
+
+        .glass-dark {
+            backdrop-filter: blur(12px);
+            background: rgba(30, 41, 59, 0.85);
+        }
+
+        /* Thinking dots animation */
+        @keyframes thinking {
+            0%, 80%, 100% { transform: scale(0.6); opacity: 0.5; }
+            40% { transform: scale(1); opacity: 1; }
+        }
+        .thinking-dot {
+            animation: thinking 1.4s ease-in-out infinite both;
+        }
+        .thinking-dot:nth-child(1) { animation-delay: -0.32s; }
+        .thinking-dot:nth-child(2) { animation-delay: -0.16s; }
+        .thinking-dot:nth-child(3) { animation-delay: 0s; }
+
+        /* Waveform container styling */
+        .waveform-container {
+            background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+            border: 2px solid #e2e8f0;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
+        }
+
+        /* Custom button styles */
+        .btn-primary {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+        .btn-secondary:hover {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .btn-accent {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+        }
+        .btn-accent:hover {
+            background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+            box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
+            transform: translateY(-2px);
+        }
+
+        /* Message bubble enhancements */
+        .message-user {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        }
+        .message-assistant {
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            border: 1px solid #e2e8f0;
+        }
+
+        /* Audio visualizer */
+        .audio-visualizer {
+            background: linear-gradient(90deg,
+                rgba(99, 102, 241, 0.1) 0%,
+                rgba(16, 185, 129, 0.1) 50%,
+                rgba(245, 158, 11, 0.1) 100%);
+        }
+
+        /* Loading animation for send button */
+        .loading-dots::after {
+            content: '';
+            display: inline-block;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: currentColor;
+            animation: loading-dots 1.4s ease-in-out infinite both;
+        }
+        @keyframes loading-dots {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+
+        /* Responsive breakpoints */
+        @media (max-width: 1024px) {
+            .version-sidebar {
+                transform: translateX(100%);
+                transition: transform 0.3s ease-in-out;
+            }
+            .version-sidebar.open {
+                transform: translateX(0);
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 overflow-hidden">
+    <!-- Main Layout Container -->
+    <div class="h-screen flex flex-col">
+        <!-- Navigation Header -->
+        <header class="glass border-b border-white/20 px-4 sm:px-6 py-3 shadow-sm">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <a href="/" class="flex items-center space-x-2 px-3 py-2 rounded-lg border border-gray-200 bg-white/50 hover:bg-white/70 transition-smooth text-sm font-medium text-gray-700 hover:text-gray-900" onclick="trackBackToSamples()">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                        </svg>
+                        <span>Back to Samples</span>
+                    </a>
+                    <div class="hidden sm:block w-px h-6 bg-gray-300"></div>
+                    <div>
+                        <h1 class="text-lg font-bold text-gray-900 truncate">{{ sample.title }}</h1>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <div class="text-right">
+                        <div class="text-sm font-medium text-gray-900">
+                            <span class="text-primary">{{ session_requests_remaining }}</span> left
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <div class="flex-1 flex min-h-0">
+            <!-- Main Chat & Waveform Section -->
+            <div class="flex-1 flex flex-col min-h-0">
+                <!-- Waveform Header -->
+                <div class="bg-white border-b border-gray-200 px-4 sm:px-6 py-4 shadow-sm">
+                    <div class="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
+                        <div class="flex items-center space-x-4">
+                            <button id="main-play-button"
+                                    class="btn-secondary text-white w-12 h-12 rounded-full flex items-center justify-center transition-smooth shadow-lg flex-shrink-0"
+                                    onclick="toggleMainAudio()">
+                                <i data-lucide="play" class="play-icon w-5 h-5"></i>
+                            </button>
+                            <div class="min-w-0">
+                                <div id="current-version-title" class="font-semibold text-gray-900 truncate">
+                                    Original Sample
+                                </div>
+                                <div id="current-version-metadata" class="text-sm text-gray-600 font-mono">
+                                    00:00 / 00:00
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-2 sm:ml-auto">
+                            <button id="main-download-button"
+                                    class="btn-accent text-white px-4 py-2 rounded-lg text-sm font-medium transition-smooth flex items-center space-x-2"
+                                    onclick="downloadCurrentVersion()">
+                                <i data-lucide="download" class="w-4 h-4"></i>
+                                <span>Download</span>
+                            </button>
+                            <button class="lg:hidden btn-primary text-white px-3 py-2 rounded-lg text-sm font-medium transition-smooth"
+                                    onclick="toggleVersionSidebar()">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Main Waveform -->
+                    <div class="mt-4">
+                        <div id="main-waveform" class="waveform-container rounded-xl min-h-[80px] bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-100">
+                            <div class="waveform-loading flex items-center justify-center h-20 text-gray-600">
+                                <div class="flex items-center space-x-2">
+                                    <div class="animate-spin-slow w-5 h-5 border-2 border-gray-300 border-t-blue-500 rounded-full"></div>
+                                    <span class="text-sm">Loading waveform...</span>
+                                </div>
+                            </div>
+                            <!-- Debug URL link -->
+                            <div class="mt-2 text-xs text-gray-500">
+                                Debug: <a href="{{ streaming_engine_base_url }}/unsafe/{{ sample.streaming_key }}" target="_blank" class="text-blue-500 underline">{{ streaming_engine_base_url }}/unsafe/{{ sample.streaming_key }}</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chat Messages Container -->
+                <div class="flex-1 flex flex-col min-h-0">
+                    <div class="flex-1 overflow-hidden">
+                        <div id="messages" class="h-full chat-messages overflow-y-auto px-4 sm:px-6 py-6 space-y-4">
+                            {% if messages.is_empty() %}
+                            <!-- Welcome State -->
+                            <div class="flex-1 flex items-center justify-center">
+                                <div class="max-w-md text-center space-y-6 animate-fade-in">
+                                    <div class="w-20 h-20 bg-gradient-to-br from-primary to-purple-600 rounded-2xl mx-auto flex items-center justify-center text-white shadow-xl">
+                                        <i data-lucide="music" class="w-10 h-10"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-2xl font-bold text-gray-900 mb-2">Ready to transform {{ sample.title }}!</h3>
+                                        <p class="text-gray-600">Describe how you want to process this audio sample.</p>
+                                    </div>
+                                    <div class="space-y-3">
+                                        <div class="text-sm font-medium text-gray-700 mb-3">Try these examples:</div>
+                                        <div class="space-y-2">
+                                            <button onclick="fillExample('Make a TikTok version of this song'); trackExampleClick('tiktok')"
+                                                    class="w-full p-4 bg-white border border-gray-200 rounded-xl text-left hover:border-primary hover:bg-primary/5 transition-smooth group">
+                                                <div class="flex items-center space-x-3">
+                                                    <i data-lucide="smartphone" class="w-6 h-6"></i>
+                                                    <span class="font-medium group-hover:text-primary">"Make a TikTok version of this song"</span>
+                                                </div>
+                                            </button>
+                                            <button onclick="fillExample('Transform this into a lo-fi chill version'); trackExampleClick('lofi')"
+                                                    class="w-full p-4 bg-white border border-gray-200 rounded-xl text-left hover:border-secondary hover:bg-secondary/5 transition-smooth group">
+                                                <div class="flex items-center space-x-3">
+                                                    <i data-lucide="coffee" class="w-6 h-6"></i>
+                                                    <span class="font-medium group-hover:text-secondary">"Transform this into a lo-fi chill version"</span>
+                                                </div>
+                                            </button>
+                                            <button onclick="fillExample('Make it sound like it\'s playing in a large cathedral'); trackExampleClick('cathedral')"
+                                                    class="w-full p-4 bg-white border border-gray-200 rounded-xl text-left hover:border-accent hover:bg-accent/5 transition-smooth group">
+                                                <div class="flex items-center space-x-3">
+                                                    <i data-lucide="church" class="w-6 h-6"></i>
+                                                    <span class="font-medium group-hover:text-accent">"Make it sound like it's playing in a large cathedral"</span>
+                                                </div>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% else %}
+                                <!-- Chat Messages -->
+                                {% for message in messages %}
+                                <div class="flex space-x-3 {% if message.role == "user" %}flex-row-reverse space-x-reverse{% endif %} animate-fade-in">
+                                    <!-- Avatar -->
+                                    <div class="flex-shrink-0">
+                                        <div class="w-10 h-10 rounded-full flex items-center justify-center {% if message.role == "user" %}bg-gradient-to-br from-primary to-purple-600 text-white{% else %}bg-gradient-to-br from-secondary to-emerald-600 text-white{% endif %} shadow-lg">
+                                            {% if message.role == "user" %}<i data-lucide="user" class="w-5 h-5"></i>{% else %}<i data-lucide="bot" class="w-5 h-5"></i>{% endif %}
+                                        </div>
+                                    </div>
+
+                                    <!-- Message Content -->
+                                    <div class="flex-1 max-w-[85%] sm:max-w-[80%]">
+                                        <div class="{% if message.role == "user" %}message-user text-white ml-auto{% else %}message-assistant{% endif %} rounded-2xl px-4 py-3 shadow-sm">
+                                            <!-- Thinking Indicator -->
+                                            {% match message.thinking %}
+                                                {% when Some with (thinking_text) %}
+                                                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-3">
+                                                    <div class="flex items-center space-x-2 text-yellow-800">
+                                                        <i data-lucide="brain" class="w-4 h-4 mr-2"></i>
+                                                        <span class="text-sm">{{ thinking_text }}</span>
+                                                    </div>
+                                                </div>
+                                                {% when None %}
+                                            {% endmatch %}
+
+                                            <!-- Tool Calls -->
+                                            {% for tool_call in message.tool_calls %}
+                                            <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-3">
+                                                <div class="font-semibold text-blue-800 text-sm mb-2 flex items-center">
+                                                    <i data-lucide="wrench" class="w-4 h-4 mr-2"></i>
+                                                    {{ tool_call.name }}
+                                                </div>
+                                                <div class="text-blue-700 text-sm font-mono bg-blue-100 rounded p-2">{{ tool_call.input }}</div>
+                                            </div>
+                                            {% endfor %}
+
+                                            <!-- Message Content -->
+                                            <div class="prose prose-sm max-w-none {% if message.role == "user" %}text-white{% else %}text-gray-800{% endif %}">
+                                                {{ message.content }}
+                                            </div>
+
+                                            <!-- Add version to history when audio is present -->
+                                            {% if !message.audio_url.is_empty() %}
+                                            <script>
+                                                // Add this version to the history when the page loads
+                                                window.addEventListener('DOMContentLoaded', () => {
+                                                    addVersionToHistory('{{ message.content }}', '{{ message.audio_url }}');
+                                                });
+                                            </script>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            {% endif %}
+
+                            <!-- Thinking Indicator -->
+                            <div id="thinking-indicator" class="hidden flex space-x-3 animate-fade-in">
+                                <div class="flex-shrink-0">
+                                    <div class="w-10 h-10 rounded-full flex items-center justify-center bg-gradient-to-br from-secondary to-emerald-600 text-white shadow-lg">
+                                        <i data-lucide="bot" class="w-5 h-5"></i>
+                                    </div>
+                                </div>
+                                <div class="flex-1 max-w-[80%]">
+                                    <div class="message-assistant rounded-2xl px-4 py-3 shadow-sm">
+                                        <div class="flex items-center space-x-2 text-gray-600">
+                                            <span class="text-sm">AI is thinking</span>
+                                            <div class="flex space-x-1">
+                                                <div class="thinking-dot w-2 h-2 bg-gray-400 rounded-full"></div>
+                                                <div class="thinking-dot w-2 h-2 bg-gray-400 rounded-full"></div>
+                                                <div class="thinking-dot w-2 h-2 bg-gray-400 rounded-full"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chat Input - Fixed at bottom -->
+                    <div class="border-t border-gray-200 bg-white/80 backdrop-blur-sm">
+                        <div class="p-4">
+                            <!-- Input Form -->
+                            <form id="chat-form" class="{% if !redis_available %}opacity-50 pointer-events-none{% endif %}">
+                                <input type="hidden" name="sample_id" value="{{ sample.streaming_key }}">
+                                <div class="flex space-x-3">
+                                    <div class="flex-1">
+                                        <input
+                                            type="text"
+                                            name="message"
+                                            id="message-input"
+                                            maxlength="2000"
+                                            class="w-full px-4 py-3 bg-white border border-gray-300 rounded-2xl focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-smooth"
+                                            placeholder="{% if !redis_available %}Chat temporarily unavailable...{% else %}Describe how you want to process {{ sample.title }}...{% endif %}"
+                                            required
+                                            {% if session_requests_remaining <= 0 %}disabled{% endif %}
+                                            {% if !redis_available %}disabled{% endif %}
+                                        >
+                                    </div>
+                                    <button
+                                        type="submit"
+                                        id="send-button"
+                                        class="btn-primary text-white px-6 py-3 rounded-2xl font-medium transition-smooth flex items-center space-x-2"
+                                        {% if session_requests_remaining <= 0 %}disabled{% endif %}
+                                        {% if !redis_available %}disabled{% endif %}
+                                    >
+                                        <span class="send-text">{% if !redis_available %}Unavailable{% else %}Send{% endif %}</span>
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Version History Sidebar -->
+            <div id="version-sidebar" class="version-sidebar w-80 bg-white border-l border-gray-200 shadow-xl lg:translate-x-0 fixed lg:relative right-0 top-0 h-full z-50 lg:z-auto">
+                <div class="flex flex-col h-full">
+                    <!-- Sidebar Header -->
+                    <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-lg font-semibold text-gray-900">Version History</h3>
+                            <button class="lg:hidden p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-200 rounded-lg transition-smooth"
+                                    onclick="toggleVersionSidebar()">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <p class="text-sm text-gray-600 mt-1">Click any version to preview</p>
+                    </div>
+
+                    <!-- Version List -->
+                    <div id="version-list" class="flex-1 version-panel overflow-y-auto p-4 space-y-3">
+                        <!-- Original version -->
+                        <div class="version-item active cursor-pointer p-4 bg-white border-2 border-primary rounded-xl shadow-sm hover:shadow-md transition-smooth"
+                             onclick="setActiveVersion(0)"
+                             data-url="{{ streaming_engine_base_url }}/unsafe/{{ sample.streaming_key }}"
+                             data-description="Original Sample">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-gradient-to-br from-green-400 to-green-600 rounded-lg flex items-center justify-center text-white font-bold text-sm">
+                                    1
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <div class="version-number font-semibold text-gray-900">Version 1</div>
+                                    <div class="version-desc text-sm text-gray-600 truncate">Original Sample</div>
+                                </div>
+                                <div class="text-green-600">
+                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Additional versions from database -->
+                        {% for version in audio_versions %}
+                        <div class="version-item cursor-pointer p-4 bg-gray-50 border border-gray-200 rounded-xl hover:bg-white hover:border-gray-300 hover:shadow-md transition-smooth"
+                             onclick="setActiveVersion({{ loop.index }})"
+                             data-url="{{ version.audio_url }}"
+                             data-description="{% match version.description %}{% when Some with (desc) %}{{ desc }}{% when None %}Processed audio{% endmatch %}">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-gradient-to-br from-blue-400 to-purple-600 rounded-lg flex items-center justify-center text-white font-bold text-sm">
+                                    {{ loop.index + 1 }}
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <div class="version-number font-semibold text-gray-900">Version {{ loop.index + 1 }}</div>
+                                    <div class="version-desc text-sm text-gray-600 truncate">{% match version.description %}{% when Some with (desc) %}{{ desc }}{% when None %}Processed audio{% endmatch %}</div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Overlay for mobile sidebar -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden hidden" onclick="toggleVersionSidebar()"></div>
+
+    <script>
+        let currentWavesurfer = null;
+        let currentVersionUrl = null;
+        let versionHistory = [];
+        let activeVersionIndex = 0;
+        let isWavesurferLoading = false;
+
+        // Initialize with server-rendered data
+        window.addEventListener('DOMContentLoaded', () => {
+            console.log('DOM Content Loaded - initializing waveform');
+
+            // Check if WaveSurfer is available
+            if (typeof WaveSurfer === 'undefined') {
+                console.error('WaveSurfer is not loaded');
+                document.getElementById('main-waveform').innerHTML = `
+                    <div class="flex items-center justify-center h-20 text-red-600">
+                        <span class="text-sm">WaveSurfer library not loaded</span>
+                    </div>
+                `;
+                return;
+            }
+
+            buildVersionHistoryFromDOM();
+
+            // Initialize with original version
+            if (versionHistory.length > 0) {
+                console.log('Initializing with first version:', versionHistory[0]);
+                initializeMainWaveform(versionHistory[0].audioUrl);
+                setActiveVersion(0);
+            } else {
+                console.error('No versions found in history');
+            }
+        });
+
+        function buildVersionHistoryFromDOM() {
+            versionHistory = [];
+            const versionItems = document.querySelectorAll('.version-item');
+            console.log('Found version items:', versionItems.length);
+            versionItems.forEach((item, index) => {
+                const url = item.getAttribute('data-url');
+                const desc = item.getAttribute('data-description') || item.querySelector('.version-desc').textContent;
+                console.log(`Version ${index}:`, { url, desc });
+                versionHistory.push({ description: desc, audioUrl: url });
+            });
+            console.log('Built version history:', versionHistory);
+        }
+
+        function addVersionToHistory(description, audioUrl) {
+            // Check if this version already exists
+            const exists = versionHistory.some(v => v.audioUrl === audioUrl);
+            if (exists) return;
+
+            // Add new version
+            versionHistory.push({ description, audioUrl });
+
+            // Create new version element
+            const versionList = document.getElementById('version-list');
+            const versionIndex = versionHistory.length - 1;
+
+            const versionElement = document.createElement('div');
+            versionElement.className = 'version-item cursor-pointer p-4 bg-gray-50 border border-gray-200 rounded-xl hover:bg-white hover:border-gray-300 hover:shadow-md transition-smooth';
+            versionElement.setAttribute('onclick', `setActiveVersion(${versionIndex})`);
+            versionElement.setAttribute('data-url', audioUrl);
+            versionElement.setAttribute('data-description', description);
+
+            versionElement.innerHTML = `
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-blue-400 to-purple-600 rounded-lg flex items-center justify-center text-white font-bold text-sm">
+                        ${versionHistory.length}
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="version-number font-semibold text-gray-900">Version ${versionHistory.length}</div>
+                        <div class="version-desc text-sm text-gray-600 truncate">${description}</div>
+                    </div>
+                </div>
+            `;
+
+            versionList.appendChild(versionElement);
+
+            // Auto-select the new version
+            setActiveVersion(versionIndex);
+        }
+
+        function initializeMainWaveform(audioUrl) {
+            console.log('Initializing main waveform with URL:', audioUrl);
+
+            // Prevent multiple simultaneous initializations
+            if (isWavesurferLoading) {
+                console.log('WaveSurfer is already loading, skipping...');
+                return;
+            }
+
+            const waveformContainer = document.getElementById('main-waveform');
+
+            if (!waveformContainer) {
+                console.error('Waveform container not found');
+                return;
+            }
+
+            console.log('Container dimensions:', waveformContainer.offsetWidth, 'x', waveformContainer.offsetHeight);
+            waveformContainer.innerHTML = '';
+            currentVersionUrl = audioUrl;
+
+            if (!audioUrl) {
+                console.error('No audio URL provided to initializeMainWaveform');
+                waveformContainer.innerHTML = `
+                    <div class="flex items-center justify-center h-20 text-red-600">
+                        <span class="text-sm">No audio URL available</span>
+                    </div>
+                `;
+                return;
+            }
+
+            // Check if WaveSurfer is available
+            if (typeof WaveSurfer === 'undefined') {
+                console.error('WaveSurfer is not available in initializeMainWaveform');
+                waveformContainer.innerHTML = `
+                    <div class="flex items-center justify-center h-20 text-red-600">
+                        <span class="text-sm">WaveSurfer library not available</span>
+                    </div>
+                `;
+                return;
+            }
+
+            // Ensure container has dimensions
+            if (waveformContainer.offsetWidth === 0) {
+                console.warn('Container has zero width, retrying after delay...');
+                setTimeout(() => initializeMainWaveform(audioUrl), 100);
+                return;
+            }
+
+            isWavesurferLoading = true;
+
+            // Destroy previous instance safely
+            if (currentWavesurfer) {
+                try {
+                    // Stop playback first
+                    if (currentWavesurfer.isPlaying && currentWavesurfer.isPlaying()) {
+                        currentWavesurfer.pause();
+                    }
+
+                    // Wait a moment before destroying
+                    setTimeout(() => {
+                        try {
+                            currentWavesurfer.destroy();
+                        } catch (destroyError) {
+                            console.warn('Error destroying previous WaveSurfer instance:', destroyError);
+                        }
+                        currentWavesurfer = null;
+                        createNewWaveSurfer();
+                    }, 50);
+                    return;
+                } catch (error) {
+                    console.warn('Error handling previous WaveSurfer instance:', error);
+                    currentWavesurfer = null;
+                }
+            }
+
+            createNewWaveSurfer();
+
+            function createNewWaveSurfer() {
+                try {
+                    console.log('Creating WaveSurfer instance...');
+                    currentWavesurfer = WaveSurfer.create({
+                        container: waveformContainer,
+                        waveColor: '#6366f1',
+                        progressColor: '#4f46e5',
+                        cursorColor: '#ef4444',
+                        barWidth: 3,
+                        barRadius: 2,
+                        height: 80,
+                        normalize: true,
+                        responsive: true
+                    });
+
+                    currentWavesurfer.on('ready', () => {
+                        isWavesurferLoading = false;
+                        const duration = formatTime(currentWavesurfer.getDuration());
+                        updateMainMetadata('00:00', duration);
+                    });
+
+                    currentWavesurfer.on('timeupdate', (currentTime) => {
+                        const current = formatTime(currentTime);
+                        const duration = formatTime(currentWavesurfer.getDuration());
+                        updateMainMetadata(current, duration);
+                    });
+
+                    currentWavesurfer.on('play', () => {
+                        const playIcon = document.querySelector('#main-play-button .play-icon');
+                        playIcon.setAttribute('data-lucide', 'pause');
+                        lucide.createIcons();
+                        document.getElementById('main-play-button').classList.add('playing');
+                    });
+
+                    currentWavesurfer.on('pause', () => {
+                        const playIcon = document.querySelector('#main-play-button .play-icon');
+                        playIcon.setAttribute('data-lucide', 'play');
+                        lucide.createIcons();
+                        document.getElementById('main-play-button').classList.remove('playing');
+                    });
+
+                    currentWavesurfer.on('error', (error) => {
+                        isWavesurferLoading = false;
+                        console.error('Waveform error:', error);
+                        console.error('Failed audio URL:', audioUrl);
+                        waveformContainer.innerHTML = `
+                            <div class="flex items-center justify-center h-20 text-red-600">
+                                <div class="flex items-center space-x-2">
+                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                                    </svg>
+                                    <span class="text-sm">Error loading waveform</span>
+                                </div>
+                            </div>
+                        `;
+                    });
+
+                    console.log('Loading audio URL:', audioUrl);
+                    currentWavesurfer.load(audioUrl);
+                } catch (error) {
+                    isWavesurferLoading = false;
+                    console.error('Error creating waveform:', error);
+                    waveformContainer.innerHTML = `
+                        <div class="flex items-center justify-center h-20 text-red-600">
+                            <span class="text-sm">Error loading waveform</span>
+                        </div>
+                    `;
+                }
+            }
+        }
+
+        function toggleMainAudio() {
+            if (!currentWavesurfer || isWavesurferLoading) {
+                console.log('WaveSurfer not ready for playback');
+                return;
+            }
+
+            try {
+                if (currentWavesurfer.isPlaying()) {
+                    currentWavesurfer.pause();
+                    trackAudioAction('pause', activeVersionIndex);
+                } else {
+                    currentWavesurfer.play();
+                    trackAudioAction('play', activeVersionIndex);
+                }
+            } catch (error) {
+                console.error('Error toggling audio:', error);
+            }
+        }
+
+        function updateMainMetadata(current, duration) {
+            document.getElementById('current-version-metadata').textContent = `${current} / ${duration}`;
+        }
+
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function setActiveVersion(index) {
+            if (index < 0 || index >= versionHistory.length) return;
+
+            activeVersionIndex = index;
+            const version = versionHistory[index];
+
+            // Track version selection
+            trackVersionSelection(index, version.description);
+
+            // Update UI
+            document.getElementById('current-version-title').textContent = version.title;
+
+            // Update version item styling
+            document.querySelectorAll('.version-item').forEach((item, i) => {
+                if (i === index) {
+                    item.classList.remove('bg-gray-50', 'border-gray-200');
+                    item.classList.add('bg-white', 'border-primary', 'border-2');
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('bg-white', 'border-primary', 'border-2', 'active');
+                    item.classList.add('bg-gray-50', 'border-gray-200');
+                }
+            });
+
+            // Load new waveform
+            initializeMainWaveform(version.audioUrl);
+        }
+
+        function downloadCurrentVersion() {
+            if (currentVersionUrl) {
+                trackAudioDownload(activeVersionIndex, versionHistory[activeVersionIndex]?.description);
+                const link = document.createElement('a');
+                link.href = currentVersionUrl;
+                link.download = `audio-agent-demo-${Date.now()}.mp3`;
+                link.click();
+            }
+        }
+
+        function toggleVersionSidebar() {
+            const sidebar = document.getElementById('version-sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('hidden');
+
+            // Track sidebar toggle
+            const isOpening = sidebar.classList.contains('open');
+            trackSidebarToggle(isOpening);
+        }
+
+        function fillExample(text) {
+            document.getElementById('message-input').value = text;
+            document.getElementById('message-input').focus();
+        }
+
+        function addErrorMessage(message) {
+            // Show user-friendly alert and log to console
+            alert('⚠️ ' + message);
+            console.error(message);
+        }
+
+        function addThinkingMessage() {
+            const thinkingIndicator = document.getElementById('thinking-indicator');
+            thinkingIndicator.classList.remove('hidden');
+            scrollToBottom();
+            return 'thinking';
+        }
+
+        function removeThinkingMessage() {
+            const thinkingIndicator = document.getElementById('thinking-indicator');
+            thinkingIndicator.classList.add('hidden');
+        }
+
+        function addMessageToUI(role, content) {
+            const messagesContainer = document.getElementById('messages');
+
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `flex space-x-3 ${role === 'user' ? 'flex-row-reverse space-x-reverse' : ''} animate-fade-in`;
+
+            messageDiv.innerHTML = `
+                <div class="flex-shrink-0">
+                    <div class="w-10 h-10 rounded-full flex items-center justify-center ${role === 'user' ? 'bg-gradient-to-br from-primary to-purple-600 text-white' : 'bg-gradient-to-br from-secondary to-emerald-600 text-white'} shadow-lg">
+                        ${role === 'user' ? '<i data-lucide="user" class="w-5 h-5"></i>' : '<i data-lucide="bot" class="w-5 h-5"></i>'}
+                    </div>
+                </div>
+                <div class="flex-1 max-w-[85%] sm:max-w-[80%]">
+                    <div class="${role === 'user' ? 'message-user text-white ml-auto' : 'message-assistant'} rounded-2xl px-4 py-3 shadow-sm">
+                        <div class="prose prose-sm max-w-none ${role === 'user' ? 'text-white' : 'text-gray-800'}">
+                            ${content}
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            messagesContainer.appendChild(messageDiv);
+            scrollToBottom();
+        }
+
+        function scrollToBottom() {
+            const messagesContainer = document.getElementById('messages');
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // Audio player functions for inline audio in messages
+        function toggleAudio(button) {
+            // Similar implementation to main chat, simplified for inline players
+            console.log('Toggle inline audio:', button.getAttribute('data-audio-url'));
+            // Implementation would be similar to the main chat template
+        }
+
+        function downloadAudio(audioUrl) {
+            const link = document.createElement('a');
+            link.href = audioUrl;
+            link.download = `audio-agent-demo-${Date.now()}.mp3`;
+            link.click();
+        }
+
+        // Form submission
+        document.getElementById('chat-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const messageInput = document.getElementById('message-input');
+            const sendButton = document.getElementById('send-button');
+            const sendText = sendButton.querySelector('.send-text');
+
+            const message = messageInput.value.trim();
+            if (!message) return;
+
+            // Check message length
+            if (message.length > 2000) {
+                addErrorMessage('Your message is too long. Please keep it under 2000 characters.');
+                return;
+            }
+
+            if (sendButton.disabled || messageInput.disabled) {
+                return;
+            }
+
+            // Disable form
+            messageInput.disabled = true;
+            sendButton.disabled = true;
+            sendButton.classList.add('opacity-75');
+            sendText.innerHTML = '<div class="flex items-center space-x-2"><div class="loading-dots"></div><span>Sending</span></div>';
+
+            // Add user message to UI
+            addMessageToUI('user', message);
+            messageInput.value = '';
+
+            // Add thinking indicator
+            addThinkingMessage();
+
+            try {
+                const formData = new URLSearchParams();
+                formData.append('message', message);
+                formData.append('sample_id', '{{ sample.streaming_key }}');
+
+                const response = await fetch('/sample/{{ sample.streaming_key }}/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: formData
+                });
+
+                if (response.ok) {
+                    // Track successful message send
+                    trackMessageSent(message, '{{ sample.streaming_key }}');
+                    window.location.reload();
+                } else {
+                    throw new Error('Server error');
+                }
+            } catch (error) {
+                console.error('Chat submission failed:', error);
+                removeThinkingMessage();
+                addErrorMessage('Failed to send message. Please try again.');
+                // Track failed message
+                trackMessageFailed(message, error.message);
+            } finally {
+                // Re-enable form
+                messageInput.disabled = false;
+                sendButton.disabled = false;
+                sendButton.classList.remove('opacity-75');
+                sendText.innerHTML = 'Send <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>';
+            }
+        });
+
+        // Auto-scroll to bottom when page loads with messages
+        document.addEventListener('DOMContentLoaded', () => {
+            if (document.querySelectorAll('.message, [class*="message"]').length > 0) {
+                scrollToBottom();
+            }
+        });
+
+        // Initialize Lucide icons after DOM content is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            lucide.createIcons();
+
+            // Track page view
+            {% if posthog_api_key.is_some() %}
+            if (typeof posthog !== 'undefined') {
+                posthog.capture('$pageview', {
+                    page: 'sample_chat',
+                    sample_key: '{{ sample.streaming_key }}',
+                    sample_title: '{{ sample.title }}',
+                    messages_count: {{ messages.len() }},
+                    versions_count: {{ audio_versions.len() + 1 }}
+                });
+            }
+            {% endif %}
+
+            // Check for error messages in URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const errorStatus = urlParams.get('error');
+
+            if (errorStatus === 'message_too_long') {
+                alert('⚠️ Your message is too long. Please keep it under 2000 characters.');
+                trackError('message_too_long');
+                // Clean up the URL
+                window.history.replaceState({}, document.title, window.location.pathname);
+            } else if (errorStatus === 'redis_unavailable') {
+                alert('⚠️ Service temporarily unavailable. Please try again later.');
+                trackError('redis_unavailable');
+                // Clean up the URL
+                window.history.replaceState({}, document.title, window.location.pathname);
+            } else if (errorStatus === 'quota_exceeded') {
+                alert('⚠️ You\'ve reached the daily message limit. Please try again tomorrow.');
+                trackError('quota_exceeded');
+                // Clean up the URL
+                window.history.replaceState({}, document.title, window.location.pathname);
+            } else if (errorStatus === 'chat_failed') {
+                alert('⚠️ There was an error processing your message. Please try again.');
+                trackError('chat_failed');
+                // Clean up the URL
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+        });
+
+        // PostHog tracking functions
+        function trackBackToSamples() {
+            {% if posthog_api_key.is_some() %}
+            if (typeof posthog !== 'undefined') {
+                posthog.capture('back_to_samples_clicked', {
+                    sample_key: '{{ sample.streaming_key }}',
+                    sample_title: '{{ sample.title }}'
+                });
+            }
+            {% endif %}
+        }
+
+        function trackExampleClick(exampleType) {
+            {% if posthog_api_key.is_some() %}
+            if (typeof posthog !== 'undefined') {
+                posthog.capture('example_clicked', {
+                    example_type: exampleType,
+                    sample_key: '{{ sample.streaming_key }}'
+                });
+            }
+            {% endif %}
+        }
+
+        function trackAudioAction(action, versionIndex) {
+            {% if posthog_api_key.is_some() %}
+            if (typeof posthog !== 'undefined') {
+                posthog.capture('audio_' + action, {
+                    version_index: versionIndex,
+                    sample_key: '{{ sample.streaming_key }}',
+                    version_description: versionHistory[versionIndex]?.description
+                });
+            }
+            {% endif %}
+        }
+
+        function trackVersionSelection(index, description) {
+            {% if posthog_api_key.is_some() %}
+            if (typeof posthog !== 'undefined') {
+                posthog.capture('version_selected', {
+                    version_index: index,
+                    version_description: description,
+                    sample_key: '{{ sample.streaming_key }}'
+                });
+            }
+            {% endif %}
+        }
+
+        function trackAudioDownload(versionIndex, description) {
+            {% if posthog_api_key.is_some() %}
+            if (typeof posthog !== 'undefined') {
+                posthog.capture('audio_downloaded', {
+                    version_index: versionIndex,
+                    version_description: description,
+                    sample_key: '{{ sample.streaming_key }}'
+                });
+            }
+            {% endif %}
+        }
+
+        function trackSidebarToggle(isOpening) {
+            {% if posthog_api_key.is_some() %}
+            if (typeof posthog !== 'undefined') {
+                posthog.capture('sidebar_toggled', {
+                    action: isOpening ? 'open' : 'close',
+                    sample_key: '{{ sample.streaming_key }}'
+                });
+            }
+            {% endif %}
+        }
+
+        function trackMessageSent(message, sampleKey) {
+            {% if posthog_api_key.is_some() %}
+            if (typeof posthog !== 'undefined') {
+                posthog.capture('message_sent', {
+                    message_length: message.length,
+                    sample_key: sampleKey,
+                    has_audio_keywords: /\b(reverb|echo|filter|speed|tempo|pitch|volume|fade|distortion|chorus|delay)\b/i.test(message)
+                });
+            }
+            {% endif %}
+        }
+
+        function trackMessageFailed(message, error) {
+            {% if posthog_api_key.is_some() %}
+            if (typeof posthog !== 'undefined') {
+                posthog.capture('message_failed', {
+                    message_length: message.length,
+                    error: error,
+                    sample_key: '{{ sample.streaming_key }}'
+                });
+            }
+            {% endif %}
+        }
+
+        function trackError(errorType) {
+            {% if posthog_api_key.is_some() %}
+            if (typeof posthog !== 'undefined') {
+                posthog.capture('error_occurred', {
+                    error_type: errorType,
+                    page: 'sample_chat',
+                    sample_key: '{{ sample.streaming_key }}'
+                });
+            }
+            {% endif %}
+        }
+
+        // Test function for debugging waveform issues
+        window.testWaveform = function(testUrl) {
+            console.log('Testing waveform with URL:', testUrl || 'default URL');
+            const url = testUrl || (versionHistory.length > 0 ? versionHistory[0].audioUrl : null);
+            if (url) {
+                initializeMainWaveform(url);
+            } else {
+                console.error('No URL available for testing');
+            }
+        };
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                if (currentWavesurfer) {
+                    currentWavesurfer.pause();
+                }
+                // Close sidebar if open
+                const sidebar = document.getElementById('version-sidebar');
+                const overlay = document.getElementById('sidebar-overlay');
+                if (sidebar.classList.contains('open')) {
+                    sidebar.classList.remove('open');
+                    overlay.classList.add('hidden');
+                }
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,62 @@
+# Rust build artifacts
+target/
+Cargo.lock
+
+# Development files
+.env
+.env.local
+.env.development
+.env.test
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Documentation
+*.md
+docs/
+
+# Test files
+tests/
+test-data/
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+tmp/
+temp/
+
+# Node modules (if any)
+node_modules/
+
+# Coverage reports
+coverage/
+tarpaulin-report.html
+
+# Local database files
+*.db
+*.sqlite
+
+# Backup files
+*.bak
+*.backup
+
+# Editor temp files
+.*.tmp
+.*.swp
+
+# Cache directories
+.cache/

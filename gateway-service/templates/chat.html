@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- SEO Meta Tags -->
+    <title>AI Audio Engineer Demo - Transform Audio with Natural Language | AI Audio Processing</title>
+    <meta name="description" content="Transform your audio files using natural language commands. Making audio processing intuitive - just describe what you want and watch your audio transform in real-time.">
+    <meta name="keywords" content="AI audio processing, audio editing, natural language audio, audio transformation, music AI, sound processing, audio effects, Ai audio engineer">
+    <meta name="author" content="AI Audio Engineer">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://getaudioengineer.com/">
+
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="AI Audio Engineer Demo - Transform Audio with Natural Language">
+    <meta property="og:description" content="Transform your audio files using natural language commands. Just describe what you want and watch your audio transform in real-time.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://getaudioengineer.com/">
+    <meta property="og:site_name" content="getaudioengineer">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="AI Audio Engineer - AI-powered audio processing interface">
+    <meta property="og:locale" content="en_US">
+
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="AI Audio Engineer - Transform Audio with Natural Language">
+    <meta name="twitter:description" content="Transform your audio files using natural language commands. Just describe what you want and watch your audio transform in real-time.">
+    <meta name="twitter:image:alt" content="AI Audio Engineer - AI-powered audio processing interface">
+    <meta name="twitter:creator" content="@jonaylor89">
+    <meta name="twitter:site" content="@jonaylor89">
+
+    <!-- Additional Meta Tags -->
+    <meta name="theme-color" content="#6366f1">
+    <meta name="msapplication-TileColor" content="#6366f1">
+    <meta name="application-name" content="AI Audio Engineer">
+    <meta name="apple-mobile-web-app-title" content="AI Audio Engineer">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="mobile-web-app-capable" content="yes">
+
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "AI Audio Engineer",
+        "description": "AI-powered audio processing platform that transforms audio files using natural language commands",
+        "url": "https://getaudioengineer.com",
+        "applicationCategory": "MultimediaApplication",
+        "operatingSystem": "Web Browser",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD",
+            "description": "Free demo with 20 requests per session"
+        },
+        "creator": {
+            "@type": "Organization",
+            "name": "AI Audio Engineer Demo",
+            "url": "https://getaudioengineer.com"
+        },
+        "featureList": [
+            "Natural language audio processing",
+            "Real-time audio transformation",
+            "Interactive waveform visualization",
+            "AI-powered audio effects"
+        ]
+    }
+    </script>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary': '#6366f1',
+                        'primary-dark': '#4f46e5',
+                        'secondary': '#10b981',
+                        'accent': '#f59e0b',
+                        'danger': '#ef4444',
+                        'surface': '#f8fafc',
+                        'surface-dark': '#1e293b'
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-in-out',
+                        'slide-up': 'slideUp 0.3s ease-out',
+                        'pulse-soft': 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'spin-slow': 'spin 3s linear infinite',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0', transform: 'translateY(10px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' }
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(100%)' },
+                            '100%': { transform: 'translateY(0)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Wavesurfer.js -->
+    <script src="https://unpkg.com/wavesurfer.js@7"></script>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+    <!-- PostHog Analytics -->
+    {% if posthog_api_key.is_some() && posthog_host.is_some() %}
+    <script>
+        !(function (t, e) {
+            var o, n, p, r;
+            e.__SV ||
+                ((window.posthog = e),
+                (e._i = []),
+                (e.init = function (i, s, a) {
+                    function g(t, e) {
+                        var o = e.split(".");
+                        2 == o.length && ((t = t[o[0]]), (e = o[1]));
+                        var n = t;
+                        if ("undefined" != typeof n[e])
+                            return (
+                                (n[e] = function () {
+                                    n.push(
+                                        [e].concat(
+                                            Array.prototype.slice.call(
+                                                arguments,
+                                                0,
+                                            ),
+                                        ),
+                                    );
+                                }),
+                                n
+                            );
+                    }
+                    ((p = t.createElement("script")).type =
+                        "text/javascript"),
+                        (p.async = !0),
+                        (p.src = s.api_host + "/static/array.js"),
+                        (r =
+                            t.getElementsByTagName(
+                                "script",
+                            )[0]).parentNode.insertBefore(p, r);
+                    var u = e;
+                    for (
+                        void 0 !== a ? (u = e[a] = []) : (a = "posthog"),
+                            u.people = u.people || [],
+                            u.toString = function (t) {
+                                var e = "posthog";
+                                return (
+                                    "posthog" !== a && (e += "." + a),
+                                    t || (e += " (stub)"),
+                                    e
+                                );
+                            },
+                            u.people.toString = function () {
+                                return u.toString(1) + ".people (stub)";
+                            },
+                            o =
+                                "capture identify alias people.set people.set_once set_config register register_once unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled onFeatureFlags getFeatureFlag getFeatureFlagPayload reloadFeatureFlags group updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures getActiveMatchingSurveys getSurveys onSessionId".split(
+                                    " ",
+                                ),
+                            n = 0;
+                        n < o.length;
+                        n++
+                    )
+                        g(u, o[n]);
+                    e._i.push([i, s, a]);
+                }),
+                (e.__SV = 1));
+        })(document, window.posthog || []);
+        try {
+            posthog.init("{{ posthog_api_key.as_ref().unwrap() }}", {
+                api_host: "/relay-TVmB",
+                person_profiles: "identified_only",
+                debug: true,
+                loaded: function(posthog) {
+                    console.log("✅ PostHog initialized successfully");
+                }
+            });
+            console.log("🔄 PostHog initialization called");
+        } catch (error) {
+            console.error("PostHog initialization failed:", error);
+            // Create a fallback posthog object to prevent errors
+            window.posthog = {
+                capture: function() { console.log("PostHog not available - event ignored"); },
+                identify: function() { console.log("PostHog not available - identify ignored"); }
+            };
+        }
+    </script>
+    {% endif %}
+
+    <!-- Custom CSS for specific functionality -->
+    <style>
+        /* Chat scrolling behavior */
+        .chat-messages {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+        }
+        .chat-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+        .chat-messages::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .chat-messages::-webkit-scrollbar-thumb {
+            background-color: rgba(156, 163, 175, 0.5);
+            border-radius: 3px;
+        }
+        .chat-messages::-webkit-scrollbar-thumb:hover {
+            background-color: rgba(156, 163, 175, 0.7);
+        }
+
+        /* Waveform container styling */
+        .waveform-container {
+            background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+            border: 2px solid #e2e8f0;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
+        }
+
+        /* Smooth transitions */
+        .transition-smooth {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Glass effect */
+        .glass {
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        /* Thinking dots animation */
+        @keyframes thinking {
+            0%, 80%, 100% { transform: scale(0.6); opacity: 0.5; }
+            40% { transform: scale(1); opacity: 1; }
+        }
+        .thinking-dot {
+            animation: thinking 1.4s ease-in-out infinite both;
+        }
+        .thinking-dot:nth-child(1) { animation-delay: -0.32s; }
+        .thinking-dot:nth-child(2) { animation-delay: -0.16s; }
+        .thinking-dot:nth-child(3) { animation-delay: 0s; }
+
+        /* Audio player enhancements */
+        .audio-visualizer {
+            background: linear-gradient(90deg,
+                rgba(99, 102, 241, 0.1) 0%,
+                rgba(16, 185, 129, 0.1) 50%,
+                rgba(245, 158, 11, 0.1) 100%);
+        }
+
+        /* Custom button styles */
+        .btn-primary {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+        .btn-secondary:hover {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+            transform: translateY(-2px);
+        }
+
+        /* Message bubble enhancements */
+        .message-user {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        }
+        .message-assistant {
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            border: 1px solid #e2e8f0;
+        }
+
+        /* Loading animation for send button */
+        .loading-dots::after {
+            content: '';
+            display: inline-block;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: currentColor;
+            animation: loading-dots 1.4s ease-in-out infinite both;
+        }
+        @keyframes loading-dots {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+
+        /* Audio button states */
+        .play-button {
+            transition: all 0.3s ease;
+        }
+        .play-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        .play-button.playing {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+            animation: pulse 2s infinite;
+        }
+        .download-button:hover {
+            background: rgba(255, 255, 255, 0.4) !important;
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 20px rgba(16, 185, 129, 0.4); }
+            50% { box-shadow: 0 0 30px rgba(16, 185, 129, 0.6); }
+            100% { box-shadow: 0 0 20px rgba(16, 185, 129, 0.4); }
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+    <!-- Main Chat Container -->
+    <div class="h-screen flex flex-col">
+        <!-- Header -->
+        <header class="glass border-b border-white/20 px-6 py-4 shadow-sm">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-gradient-to-br from-primary to-purple-600 rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                            <i data-lucide="music" class="w-6 h-6"></i>
+                        </div>
+                        <div>
+                            <h1 class="text-xl font-bold text-gray-900">AI Audio Engineer</h1>
+                            <p class="text-sm text-gray-600">AI-powered audio processing</p>
+                        </div>
+                    </div>
+                    <div class="hidden sm:block">
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-danger/10 text-danger border border-danger/20">
+                            DEMO MODE
+                        </span>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="text-right">
+                        <div class="text-sm font-medium text-gray-900">
+                            <span class="text-primary">{{ session_requests_remaining }}</span> requests left
+                        </div>
+                        <div class="text-xs text-gray-500">Session: {{ session_id[0..8] }}...</div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Chat Messages Container -->
+        <div class="flex-1 flex flex-col min-h-0">
+            <div class="flex-1 overflow-hidden">
+                <div id="messages" class="h-full chat-messages overflow-y-auto px-4 py-6 space-y-4">
+                    <!-- Error message display -->
+                    <div id="error-display" class="hidden p-4 bg-red-50 border border-red-200 rounded-xl text-red-800 animate-fade-in">
+                        <div class="flex items-center space-x-2">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                            </svg>
+                            <span id="error-text"></span>
+                        </div>
+                    </div>
+
+                    {% if messages.is_empty() %}
+                    <!-- Welcome State -->
+                    <div class="flex-1 flex items-center justify-center">
+                        <div class="max-w-md text-center space-y-6 animate-fade-in">
+                            <div class="w-20 h-20 bg-gradient-to-br from-primary to-purple-600 rounded-2xl mx-auto flex items-center justify-center text-white text-3xl shadow-xl">
+                                <i data-lucide="music" class="w-10 h-10"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-2xl font-bold text-gray-900 mb-2">Welcome to the first Audio Engineering Demo!</h3>
+                                <p class="text-gray-600">Ask me to process audio files using natural language.</p>
+                            </div>
+
+                            <div class="space-y-3">
+                                <div class="text-sm font-medium text-gray-700 mb-3">Try these examples:</div>
+                                <div class="space-y-2">
+                                    <button onclick="fillExample('Reverse Sample 1 and add echo'); trackExampleClick('reverse_echo')"
+                                            class="w-full p-4 bg-white border border-gray-200 rounded-xl text-left hover:border-primary hover:bg-primary/5 transition-smooth group">
+                                        <div class="flex items-center space-x-3">
+                                            <span class="text-xl">💫</span>
+                                            <span class="font-medium group-hover:text-primary">"Reverse Sample 1 and add echo"</span>
+                                        </div>
+                                    </button>
+                                    <button onclick="fillExample('Make Sample 2 play faster with a fade in'); trackExampleClick('speed_fade')"
+                                            class="w-full p-4 bg-white border border-gray-200 rounded-xl text-left hover:border-secondary hover:bg-secondary/5 transition-smooth group">
+                                        <div class="flex items-center space-x-3">
+                                            <span class="text-xl">⚡</span>
+                                            <span class="font-medium group-hover:text-secondary">"Make Sample 2 play faster with a fade in"</span>
+                                        </div>
+                                    </button>
+                                    <button onclick="fillExample('Add chorus effect to Sample 3'); trackExampleClick('chorus_effect')"
+                                            class="w-full p-4 bg-white border border-gray-200 rounded-xl text-left hover:border-accent hover:bg-accent/5 transition-smooth group">
+                                        <div class="flex items-center space-x-3">
+                                            <span class="text-xl">🎶</span>
+                                            <span class="font-medium group-hover:text-accent">"Add chorus effect to Sample 3"</span>
+                                        </div>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                        <!-- Chat Messages -->
+                        {% for message in messages %}
+                        <div class="flex space-x-3 {% if message.role == "user" %}flex-row-reverse space-x-reverse{% endif %} animate-fade-in">
+                            <!-- Avatar -->
+                            <div class="flex-shrink-0">
+                                <div class="w-10 h-10 rounded-full flex items-center justify-center {% if message.role == "user" %}bg-gradient-to-br from-primary to-purple-600 text-white{% else %}bg-gradient-to-br from-secondary to-emerald-600 text-white{% endif %} shadow-lg">
+                                    {% if message.role == "user" %}<i data-lucide="message-circle" class="w-5 h-5"></i>{% else %}<i data-lucide="bot" class="w-5 h-5"></i>{% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Message Content -->
+                            <div class="flex-1 max-w-[80%]">
+                                <div class="{% if message.role == "user" %}message-user text-white ml-auto{% else %}message-assistant{% endif %} rounded-2xl px-4 py-3 shadow-sm">
+                                    <div class="prose prose-sm max-w-none {% if message.role == "user" %}text-white{% else %}text-gray-800{% endif %}">
+                                        {{ message.content }}
+                                    </div>
+
+                                    <!-- Audio Player -->
+                                    {% if !message.audio_url.is_empty() %}
+                                    <div class="mt-4 p-4 {% if message.role == "user" %}bg-white/10 backdrop-blur-sm border border-white/20{% else %}bg-gray-50 backdrop-blur-sm border border-gray-200{% endif %} rounded-xl">
+                                        <div class="flex items-center space-x-4 mb-3">
+                                            <button class="play-button flex-shrink-0 w-12 h-12 {% if message.role == "user" %}bg-white/20 hover:bg-white/30 text-white{% else %}bg-gray-200 hover:bg-gray-300 text-gray-700{% endif %} rounded-full flex items-center justify-center transition-smooth shadow-lg"
+                                                    data-audio-url="{{ message.audio_url }}"
+                                                    onclick="toggleAudio(this)">
+                                                <i data-lucide="play" class="play-icon w-5 h-5"></i>
+                                            </button>
+                                            <div class="flex-1 min-w-0">
+                                                <div class="font-medium {% if message.role == "user" %}text-white/90{% else %}text-gray-700{% endif %} text-sm flex items-center gap-2">
+                                                    <i data-lucide="music" class="w-4 h-4"></i>
+                                                    Processed Audio
+                                                </div>
+                                                <div class="audio-time {% if message.role == "user" %}text-white/70{% else %}text-gray-600{% endif %} text-xs font-mono">--:-- / --:--</div>
+                                            </div>
+                                            <button class="download-button px-3 py-2 {% if message.role == "user" %}bg-white/20 hover:bg-white/30 text-white{% else %}bg-gray-200 hover:bg-gray-300 text-gray-700{% endif %} rounded-lg text-xs font-medium transition-smooth flex items-center space-x-1"
+                                                    onclick="downloadAudio('{{ message.audio_url }}'); trackAudioDownload('inline')">
+                                                <i data-lucide="download" class="w-4 h-4"></i>
+                                                <span>Download</span>
+                                            </button>
+                                        </div>
+                                        <div class="waveform-container rounded-lg min-h-[80px] {% if message.role == "user" %}bg-white/5 border border-white/10{% else %}bg-gray-50 border border-gray-200{% endif %}"
+                                             id="waveform-{{ loop.index }}">
+                                            <div class="waveform-loading flex items-center justify-center h-20 {% if message.role == "user" %}text-white/70{% else %}text-gray-600{% endif %} text-sm">
+                                                <div class="flex items-center space-x-2">
+                                                    <div class="animate-spin-slow w-4 h-4 border-2 {% if message.role == "user" %}border-white/30 border-t-white/70{% else %}border-gray-300 border-t-gray-600{% endif %} rounded-full"></div>
+                                                    <span>Loading waveform...</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <!-- Thinking Indicator -->
+                    <div id="thinking-indicator" class="hidden flex space-x-3 animate-fade-in">
+                        <div class="flex-shrink-0">
+                            <div class="w-10 h-10 rounded-full flex items-center justify-center bg-gradient-to-br from-secondary to-emerald-600 text-white shadow-lg">
+                                <i data-lucide="bot" class="w-5 h-5"></i>
+                            </div>
+                        </div>
+                        <div class="flex-1 max-w-[80%]">
+                            <div class="message-assistant rounded-2xl px-4 py-3 shadow-sm">
+                                <div class="flex items-center space-x-2 text-gray-600">
+                                    <span class="text-sm">AI is thinking</span>
+                                    <div class="flex space-x-1">
+                                        <div class="thinking-dot w-2 h-2 bg-gray-400 rounded-full"></div>
+                                        <div class="thinking-dot w-2 h-2 bg-gray-400 rounded-full"></div>
+                                        <div class="thinking-dot w-2 h-2 bg-gray-400 rounded-full"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chat Input - Fixed at bottom -->
+            <div class="border-t border-gray-200 bg-white/80 backdrop-blur-sm">
+                <div class="p-4">
+
+
+                    <!-- Input Form -->
+                    <form id="chat-form" class="{% if !redis_available %}opacity-50 pointer-events-none{% endif %}">
+                        <div class="flex space-x-3">
+                            <div class="flex-1">
+                                <input
+                                    type="text"
+                                    name="message"
+                                    id="message-input"
+                                    maxlength="2000"
+                                    class="w-full px-4 py-3 bg-white border border-gray-300 rounded-2xl focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-smooth resize-none"
+                                    placeholder="{% if !redis_available %}Chat temporarily unavailable due to maintenance...{% else %}Describe how you want to process your audio...{% endif %}"
+                                    required
+                                    {% if session_requests_remaining <= 0 %}disabled{% endif %}
+                                    {% if !redis_available %}disabled{% endif %}
+                                >
+                            </div>
+                            <button
+                                type="submit"
+                                id="send-button"
+                                class="btn-primary text-white px-6 py-3 rounded-2xl font-medium transition-smooth flex items-center space-x-2"
+                                {% if session_requests_remaining <= 0 %}disabled{% endif %}
+                                {% if !redis_available %}disabled{% endif %}
+                            >
+                                <span class="send-text">{% if !redis_available %}Unavailable{% else %}Send{% endif %}</span>
+                                <i data-lucide="send" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentWavesurfer = null;
+        let currentButton = null;
+        let wavesurferCache = new Map();
+
+        function attachWavesurferEventHandlers(wavesurfer, button) {
+            const playIcon = button.querySelector('.play-icon');
+
+            // Remove existing event listeners to prevent duplicates
+            wavesurfer.un('loading');
+            wavesurfer.un('ready');
+            wavesurfer.un('play');
+            wavesurfer.un('pause');
+            wavesurfer.un('finish');
+            wavesurfer.un('timeupdate');
+
+            wavesurfer.on('loading', (percent) => {
+                if (currentButton === button) {
+                    updateTimeDisplay(button, `Loading ${Math.round(percent)}%`, '');
+                }
+            });
+
+            wavesurfer.on('ready', () => {
+                if (currentButton === button) {
+                    button.disabled = false;
+                    playIcon.classList.remove('animate-spin');
+                    const duration = formatTime(wavesurfer.getDuration());
+                    updateTimeDisplay(button, '00:00', duration);
+                    wavesurfer.play();
+
+                    // Fallback: ensure loading state is cleared after a short delay
+                    setTimeout(() => {
+                        if (currentButton === button && playIcon.classList.contains('animate-spin')) {
+                            playIcon.classList.remove('animate-spin');
+                            playIcon.setAttribute('data-lucide', 'pause');
+                            lucide.createIcons();
+                        }
+                    }, 500);
+                }
+            });
+
+            wavesurfer.on('play', () => {
+                if (currentButton === button) {
+                    button.classList.add('playing');
+                    playIcon.setAttribute('data-lucide', 'pause');
+                    playIcon.classList.remove('animate-spin');
+                    lucide.createIcons();
+                }
+            });
+
+            wavesurfer.on('pause', () => {
+                if (currentButton === button) {
+                    button.classList.remove('playing');
+                    playIcon.setAttribute('data-lucide', 'play');
+                    playIcon.classList.remove('animate-spin');
+                    lucide.createIcons();
+                }
+            });
+
+            wavesurfer.on('finish', () => {
+                if (currentButton === button) {
+                    stopCurrentAudio();
+                }
+            });
+
+            wavesurfer.on('timeupdate', (currentTime) => {
+                if (currentButton === button) {
+                    const current = formatTime(currentTime);
+                    const duration = formatTime(wavesurfer.getDuration());
+                    updateTimeDisplay(button, current, duration);
+                }
+            });
+        }
+
+        function attachHtml5AudioEventHandlers(audioElement, button) {
+            const playIcon = button.querySelector('.play-icon');
+
+            // Remove existing event listeners to prevent duplicates
+            audioElement.removeEventListener('loadedmetadata', audioElement._loadedmetadataHandler);
+            audioElement.removeEventListener('timeupdate', audioElement._timeupdateHandler);
+            audioElement.removeEventListener('play', audioElement._playHandler);
+            audioElement.removeEventListener('pause', audioElement._pauseHandler);
+            audioElement.removeEventListener('ended', audioElement._endedHandler);
+
+            // Store handlers on the element for later removal
+            audioElement._loadedmetadataHandler = () => {
+                const duration = formatTime(audioElement.duration);
+                updateTimeDisplay(button, '00:00', duration);
+                button.disabled = false;
+                playIcon.classList.remove('animate-spin');
+                playIcon.setAttribute('data-lucide', 'play');
+                lucide.createIcons();
+            };
+
+            audioElement._timeupdateHandler = () => {
+                if (currentButton === button) {
+                    const current = formatTime(audioElement.currentTime);
+                    const duration = formatTime(audioElement.duration);
+                    updateTimeDisplay(button, current, duration);
+                }
+            };
+
+            audioElement._playHandler = () => {
+                if (currentButton === button) {
+                    button.classList.add('playing');
+                    playIcon.setAttribute('data-lucide', 'pause');
+                    playIcon.classList.remove('animate-spin');
+                    lucide.createIcons();
+                }
+            };
+
+            audioElement._pauseHandler = () => {
+                if (currentButton === button) {
+                    button.classList.remove('playing');
+                    playIcon.setAttribute('data-lucide', 'play');
+                    playIcon.classList.remove('animate-spin');
+                    lucide.createIcons();
+                }
+            };
+
+            audioElement._endedHandler = () => {
+                if (currentButton === button) {
+                    stopCurrentAudio();
+                }
+            };
+
+            // Attach the handlers
+            audioElement.addEventListener('loadedmetadata', audioElement._loadedmetadataHandler);
+            audioElement.addEventListener('timeupdate', audioElement._timeupdateHandler);
+            audioElement.addEventListener('play', audioElement._playHandler);
+            audioElement.addEventListener('pause', audioElement._pauseHandler);
+            audioElement.addEventListener('ended', audioElement._endedHandler);
+        }
+
+        function stopCurrentAudio() {
+            if (currentWavesurfer) {
+                if (currentWavesurfer.isAudio) {
+                    currentWavesurfer.element.pause();
+                    currentWavesurfer.element.currentTime = 0;
+                } else {
+                    currentWavesurfer.pause();
+                    currentWavesurfer.seekTo(0);
+                }
+            }
+            if (currentButton) {
+                currentButton.classList.remove('playing');
+                const icon = currentButton.querySelector('.play-icon');
+                icon.setAttribute('data-lucide', 'play');
+                icon.classList.remove('animate-spin');
+                lucide.createIcons();
+                currentButton.disabled = false;
+                updateTimeDisplay(currentButton, '00:00', '00:00');
+            }
+            currentWavesurfer = null;
+            currentButton = null;
+        }
+
+        function updateTimeDisplay(button, current, duration) {
+            const timeEl = button.parentElement.querySelector('.audio-time');
+            if (timeEl) {
+                timeEl.textContent = `${current} / ${duration}`;
+            }
+        }
+
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function createFallbackAudio(audioUrl, container, button) {
+            container.innerHTML = `
+                <div class="p-4">
+                    <audio controls class="w-full">
+                        <source src="${audioUrl}" type="audio/mpeg">
+                        <source src="${audioUrl}" type="audio/wav">
+                        <source src="${audioUrl}" type="audio/ogg">
+                        Your browser does not support the audio element.
+                    </audio>
+                </div>
+            `;
+
+            const audioElement = container.querySelector('audio');
+            if (audioElement) {
+                attachHtml5AudioEventHandlers(audioElement, button);
+                return { isAudio: true, element: audioElement };
+            }
+            return null;
+        }
+
+        function toggleAudio(button) {
+            const audioUrl = button.getAttribute('data-audio-url');
+            const playIcon = button.querySelector('.play-icon');
+            const waveformContainer = button.parentElement.parentElement.querySelector('.waveform-container');
+
+            // If clicking the same button that's currently playing, just toggle
+            if (currentButton === button && currentWavesurfer) {
+                if (currentWavesurfer.isAudio) {
+                    if (!currentWavesurfer.element.paused) {
+                        currentWavesurfer.element.pause();
+                        trackAudioAction('pause', 'inline');
+                    } else {
+                        currentWavesurfer.element.play();
+                        trackAudioAction('play', 'inline');
+                    }
+                } else if (currentWavesurfer.isPlaying()) {
+                    currentWavesurfer.pause();
+                    trackAudioAction('pause', 'inline');
+                } else {
+                    currentWavesurfer.play();
+                    trackAudioAction('play', 'inline');
+                }
+                return;
+            }
+
+            // Stop any currently playing audio
+            stopCurrentAudio();
+
+            // Set current references early
+            currentButton = button;
+
+            // Get or create wavesurfer instance
+            let wavesurfer = wavesurferCache.get(audioUrl);
+            if (!wavesurfer) {
+                button.disabled = true;
+                playIcon.setAttribute('data-lucide', 'loader-2');
+                playIcon.classList.add('animate-spin');
+                lucide.createIcons();
+                updateTimeDisplay(button, 'Loading...', '');
+                waveformContainer.innerHTML = '';
+
+                try {
+                    wavesurfer = WaveSurfer.create({
+                        container: waveformContainer,
+                        waveColor: '#6366f1',
+                        progressColor: '#4f46e5',
+                        cursorColor: '#ef4444',
+                        barWidth: 2,
+                        barRadius: 3,
+                        height: 64,
+                        normalize: true
+                    });
+
+                    wavesurferCache.set(audioUrl, wavesurfer);
+                    attachWavesurferEventHandlers(wavesurfer, button);
+
+                    wavesurfer.on('error', (error) => {
+                        console.error('Wavesurfer error, falling back to HTML5 audio:', error);
+                        if (currentButton === button) {
+                            wavesurferCache.delete(audioUrl);
+                            const fallbackAudio = createFallbackAudio(audioUrl, waveformContainer, button);
+                            if (fallbackAudio) {
+                                wavesurferCache.set(audioUrl, fallbackAudio);
+                                currentWavesurfer = fallbackAudio;
+                            } else {
+                                button.classList.remove('playing');
+                                button.disabled = false;
+                                playIcon.setAttribute('data-lucide', 'x-circle');
+                                playIcon.classList.remove('animate-spin');
+                                lucide.createIcons();
+                                updateTimeDisplay(button, 'Error', '');
+                                currentWavesurfer = null;
+                                currentButton = null;
+                            }
+                        }
+                    });
+
+                    wavesurfer.load(audioUrl);
+
+                } catch (error) {
+                    console.error('Error creating wavesurfer, trying fallback:', error);
+                    const fallbackAudio = createFallbackAudio(audioUrl, waveformContainer, button);
+                    if (fallbackAudio) {
+                        wavesurferCache.set(audioUrl, fallbackAudio);
+                        wavesurfer = fallbackAudio;
+                        currentWavesurfer = fallbackAudio;
+                    } else {
+                        button.disabled = false;
+                        playIcon.setAttribute('data-lucide', 'x-circle');
+                        playIcon.classList.remove('animate-spin');
+                        lucide.createIcons();
+                        updateTimeDisplay(button, 'Error', '');
+                        return;
+                    }
+                }
+            } else {
+                button.disabled = false;
+                playIcon.classList.remove('animate-spin');
+
+                if (wavesurfer.isAudio) {
+                    // Reattach event handlers for cached HTML5 audio
+                    attachHtml5AudioEventHandlers(wavesurfer.element, button);
+                    const duration = formatTime(wavesurfer.element.duration || 0);
+                    updateTimeDisplay(button, '00:00', duration);
+                    playIcon.setAttribute('data-lucide', 'play');
+                    lucide.createIcons();
+                    try {
+                        wavesurfer.element.play();
+                    } catch (error) {
+                        console.error('Error playing HTML5 audio:', error);
+                    }
+                } else {
+                    // Reattach event handlers for cached wavesurfer instance
+                    attachWavesurferEventHandlers(wavesurfer, button);
+                    const duration = formatTime(wavesurfer.getDuration());
+                    updateTimeDisplay(button, '00:00', duration);
+                    playIcon.setAttribute('data-lucide', 'play');
+                    lucide.createIcons();
+                    try {
+                        wavesurfer.play();
+                    } catch (error) {
+                        console.error('Error playing wavesurfer:', error);
+                    }
+                }
+            }
+
+            currentWavesurfer = wavesurfer;
+        }
+
+        function downloadAudio(audioUrl) {
+            const link = document.createElement('a');
+            link.href = audioUrl;
+            link.download = `ai-audio-agent-demo-${Date.now()}.mp3`;
+            link.click();
+        }
+
+        function fillExample(text) {
+            document.getElementById('message-input').value = text;
+            document.getElementById('message-input').focus();
+        }
+
+
+
+        function addErrorMessage(message) {
+            const errorDisplay = document.getElementById('error-display');
+            const errorText = document.getElementById('error-text');
+            errorText.textContent = message;
+            errorDisplay.classList.remove('hidden');
+            setTimeout(() => {
+                errorDisplay.classList.add('hidden');
+            }, 5000);
+        }
+
+        function addThinkingMessage() {
+            const thinkingIndicator = document.getElementById('thinking-indicator');
+            thinkingIndicator.classList.remove('hidden');
+            scrollToBottom();
+            return 'thinking';
+        }
+
+        function removeThinkingMessage() {
+            const thinkingIndicator = document.getElementById('thinking-indicator');
+            thinkingIndicator.classList.add('hidden');
+        }
+
+        function addMessageToUI(role, content) {
+            const messagesContainer = document.getElementById('messages');
+
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `flex space-x-3 ${role === 'user' ? 'flex-row-reverse space-x-reverse' : ''} animate-fade-in`;
+
+            messageDiv.innerHTML = `
+                <div class="flex-shrink-0">
+                    <div class="w-10 h-10 rounded-full flex items-center justify-center ${role === 'user' ? 'bg-gradient-to-br from-primary to-purple-600 text-white' : 'bg-gradient-to-br from-secondary to-emerald-600 text-white'} shadow-lg">
+                        ${role === 'user' ? '<i data-lucide="message-circle" class="w-5 h-5"></i>' : '<i data-lucide="bot" class="w-5 h-5"></i>'}
+                    </div>
+                </div>
+                <div class="flex-1 max-w-[80%]">
+                    <div class="${role === 'user' ? 'message-user text-white ml-auto' : 'message-assistant'} rounded-2xl px-4 py-3 shadow-sm">
+                        <div class="prose prose-sm max-w-none ${role === 'user' ? 'text-white' : 'text-gray-800'}">
+                            ${content}
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            messagesContainer.appendChild(messageDiv);
+            lucide.createIcons();
+            scrollToBottom();
+        }
+
+        function scrollToBottom() {
+            const messagesContainer = document.getElementById('messages');
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // Form submission handling
+        document.getElementById('chat-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const messageInput = document.getElementById('message-input');
+            const sendButton = document.getElementById('send-button');
+            const sendText = sendButton.querySelector('.send-text');
+
+            const message = messageInput.value.trim();
+            if (!message) return;
+
+            // Check message length
+            if (message.length > 2000) {
+                addErrorMessage('Your message is too long. Please keep it under 2000 characters.');
+                return;
+            }
+
+            if (sendButton.disabled || messageInput.disabled) {
+                addErrorMessage('Unable to send message at this time.');
+                return;
+            }
+
+            // Disable form and show loading state
+            messageInput.disabled = true;
+            sendButton.disabled = true;
+            sendButton.classList.add('opacity-75');
+            sendText.innerHTML = '<div class="flex items-center space-x-2"><i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i><span>Sending</span></div>';
+            lucide.createIcons();
+
+            // Add user message to UI immediately
+            addMessageToUI('user', message);
+            messageInput.value = '';
+
+            // Add thinking indicator
+            const thinkingId = addThinkingMessage();
+
+            try {
+                const formData = new URLSearchParams();
+                formData.append('message', message);
+
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: formData
+                });
+
+                if (response.ok) {
+                    // Track successful message send
+                    trackMessageSent(message);
+                    window.location.reload();
+                } else {
+                    throw new Error('Server error');
+                }
+            } catch (error) {
+                console.error('Chat submission failed:', error);
+                removeThinkingMessage();
+                addErrorMessage('Failed to send message. Please try again.');
+                // Track failed message
+                trackMessageFailed(message, error.message);
+            } finally {
+                // Re-enable form
+                messageInput.disabled = false;
+                sendButton.disabled = false;
+                sendButton.classList.remove('opacity-75');
+                sendText.innerHTML = 'Send <i data-lucide="send" class="w-4 h-4"></i>';
+                lucide.createIcons();
+            }
+        });
+
+        // Initialize waveforms on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            const audioContainers = document.querySelectorAll('.waveform-container');
+            audioContainers.forEach((container, index) => {
+                // Find the play button in the same parent container
+                const parentContainer = container.parentElement;
+                const button = parentContainer?.querySelector('.play-button');
+                const audioUrl = button?.getAttribute('data-audio-url');
+
+                if (audioUrl && button) {
+                    setTimeout(() => {
+                        if (!wavesurferCache.has(audioUrl)) {
+                            try {
+                                const wavesurfer = WaveSurfer.create({
+                                    container: container,
+                                    waveColor: '#6366f1',
+                                    progressColor: '#4f46e5',
+                                    cursorColor: '#ef4444',
+                                    barWidth: 2,
+                                    barRadius: 3,
+                                    height: 64,
+                                    normalize: true
+                                });
+
+                                wavesurferCache.set(audioUrl, wavesurfer);
+
+                                wavesurfer.on('ready', () => {
+                                    const duration = formatTime(wavesurfer.getDuration());
+                                    if (button) {
+                                        updateTimeDisplay(button, '00:00', duration);
+                                    }
+                                    // Hide loading text
+                                    const loadingEl = container.querySelector('.waveform-loading');
+                                    if (loadingEl) {
+                                        loadingEl.style.display = 'none';
+                                    }
+                                });
+
+                                wavesurfer.on('error', (error) => {
+                                    console.error('Pre-load error:', error);
+                                    wavesurferCache.delete(audioUrl);
+                                    // Hide loading text and show error
+                                    const loadingEl = container.querySelector('.waveform-loading');
+                                    if (loadingEl) {
+                                        loadingEl.innerHTML = '<div class="flex items-center justify-center h-20 text-red-500 text-sm gap-2"><i data-lucide="x-circle" class="w-4 h-4"></i> Failed to load waveform</div>';
+                                        lucide.createIcons();
+                                    }
+                                });
+
+                                wavesurfer.load(audioUrl);
+
+                            } catch (error) {
+                                console.error('Error pre-loading wavesurfer:', error);
+                            }
+                        }
+                    }, index * 500);
+                }
+            });
+
+            // Auto-scroll to bottom if there are messages
+            if (document.querySelectorAll('.message, [class*="message"]').length > 0) {
+                scrollToBottom();
+            }
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                stopCurrentAudio();
+            }
+        });
+
+
+        function updateCharacterCount(textarea, counterId) {
+            const count = textarea.value.length;
+            const counter = document.getElementById(counterId);
+            if (counter) {
+                counter.textContent = count;
+                if (count > 1000) {
+                    counter.parentElement.classList.add('text-red-500');
+                    counter.parentElement.classList.remove('text-gray-500');
+                } else {
+                    counter.parentElement.classList.add('text-gray-500');
+                    counter.parentElement.classList.remove('text-red-500');
+                }
+            }
+        }
+
+        // PostHog tracking functions
+        function trackExampleClick(exampleType) {
+            {% if posthog_api_key.is_some() %}
+            if (typeof posthog !== 'undefined') {
+                posthog.capture('example_clicked', {
+                    example_type: exampleType,
+                    page: 'chat'
+                });
+            }
+            {% endif %}
+        }
+
+
+
+        function trackAudioAction(action, location) {
+            {% if posthog_api_key.is_some() %}
+            if (typeof posthog !== 'undefined') {
+                posthog.capture('audio_' + action, {
+                    location: location,
+                    page: 'chat'
+                });
+            }
+            {% endif %}
+        }
+
+        function trackAudioDownload(location) {
+            {% if posthog_api_key.is_some() %}
+            if (typeof posthog !== 'undefined') {
+                posthog.capture('audio_downloaded', {
+                    location: location,
+                    page: 'chat'
+                });
+            }
+            {% endif %}
+        }
+
+        function trackMessageSent(message) {
+            {% if posthog_api_key.is_some() %}
+            if (typeof posthog !== 'undefined') {
+                posthog.capture('message_sent', {
+                    message_length: message.length,
+                    page: 'chat',
+                    has_audio_keywords: /\b(reverb|echo|filter|speed|tempo|pitch|volume|fade|distortion|chorus|delay|sample)\b/i.test(message)
+                });
+            }
+            {% endif %}
+        }
+
+        function trackMessageFailed(message, error) {
+            {% if posthog_api_key.is_some() %}
+            if (typeof posthog !== 'undefined') {
+                posthog.capture('message_failed', {
+                    message_length: message.length,
+                    error: error,
+                    page: 'chat'
+                });
+            }
+            {% endif %}
+        }
+
+        function trackError(errorType) {
+            {% if posthog_api_key.is_some() %}
+            if (typeof posthog !== 'undefined') {
+                posthog.capture('error_occurred', {
+                    error_type: errorType,
+                    page: 'chat'
+                });
+            }
+            {% endif %}
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Track page view
+            {% if posthog_api_key.is_some() %}
+            if (typeof posthog !== 'undefined') {
+                posthog.capture('$pageview', {
+                    page: 'chat',
+                    session_id: '{{ session_id }}',
+                    messages_count: {{ messages.len() }},
+                    requests_remaining: {{ session_requests_remaining }}
+                });
+            }
+            {% endif %}
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const errorStatus = urlParams.get('error');
+
+            if (errorStatus === 'message_too_long') {
+                alert('⚠️ Your message is too long. Please keep it under 2000 characters.');
+                trackError('message_too_long');
+                // Clean up the URL
+                window.history.replaceState({}, document.title, window.location.pathname);
+            } else if (errorStatus === 'redis_unavailable') {
+                alert('⚠️ Service temporarily unavailable. Please try again later.');
+                trackError('redis_unavailable');
+                // Clean up the URL
+                window.history.replaceState({}, document.title, window.location.pathname);
+            } else if (errorStatus === 'quota_exceeded') {
+                alert('⚠️ You\'ve reached the daily message limit. Please try again tomorrow.');
+                trackError('quota_exceeded');
+                // Clean up the URL
+                window.history.replaceState({}, document.title, window.location.pathname);
+            } else if (errorStatus === 'chat_failed') {
+                alert('⚠️ There was an error processing your message. Please try again.');
+                trackError('chat_failed');
+                // Clean up the URL
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+        });
+    </script>
+
+    <!-- Initialize Lucide Icons -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            lucide.createIcons();
+        });
+    </script>
+
+
+</body>
+</html>

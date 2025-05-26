@@ -1,0 +1,46 @@
+# Google Cloud Build configuration for automatic deployment
+steps:
+  # Build the container image
+  - name: "gcr.io/cloud-builders/docker"
+    args:
+      [
+        "build",
+        "-f",
+        "Dockerfile.streaming",
+        "-t",
+        "gcr.io/$PROJECT_ID/streaming-engine:$COMMIT_SHA",
+        ".",
+      ]
+
+  # Push the container image to Container Registry
+  - name: "gcr.io/cloud-builders/docker"
+    args: ["push", "gcr.io/$PROJECT_ID/streaming-engine:$COMMIT_SHA"]
+
+  # Deploy container image to Cloud Run
+  - name: "gcr.io/cloud-builders/gcloud"
+    args:
+      - "run"
+      - "deploy"
+      - "streaming-engine"
+      - "--image"
+      - "gcr.io/$PROJECT_ID/streaming-engine:$COMMIT_SHA"
+      - "--region"
+      - "us-central1"
+      - "--platform"
+      - "managed"
+      - "--allow-unauthenticated"
+      - "--memory"
+      - "2Gi"
+      - "--cpu"
+      - "2"
+      - "--max-instances"
+      - "10"
+      - "--timeout"
+      - "900"
+      - "--port"
+      - "8080"
+      - "--set-env-vars"
+      - "APP_ENVIRONMENT=production"
+
+images:
+  - "gcr.io/$PROJECT_ID/streaming-engine:$COMMIT_SHA"

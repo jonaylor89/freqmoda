@@ -1,0 +1,96 @@
+# This file specifies files that are ignored by gcloud when uploading to Cloud Build
+# Unlike .gitignore, this controls what gets sent to the build environment
+
+# Development files
+.env
+.env.local
+.env.development
+.env.test
+
+# Build artifacts
+target/
+.cargo/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Documentation (not needed for build)
+*.md
+docs/
+
+# Test files (not needed for production build)
+tests/
+test-data/
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+tmp/
+temp/
+
+# Node modules (if any)
+node_modules/
+
+# Coverage reports
+coverage/
+tarpaulin-report.html
+
+# Local database files
+*.db
+*.sqlite
+
+# Backup files
+*.bak
+*.backup
+
+# Editor temp files
+.*.tmp
+.*.swp
+
+# Cache directories
+.cache/
+
+# Scripts not needed in container (but needed for deployment)
+# build.sh
+
+# Don't ignore service config directories - we need them in the build!
+# gateway-service/config/
+# streaming-engine/config/
+# migrations/
+
+# Ignore webapp build artifacts if present
+webapp/dist/
+webapp/node_modules/
+webapp/.next/
+webapp/build/
+
+# Python cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Rope project files
+.ropeproject/
+
+# SQLx offline query data (contains prepared queries)
+# !.sqlx/
+
+# Include the service-specific Dockerfiles in the build
+# !Dockerfile.gateway
+# !Dockerfile.streaming

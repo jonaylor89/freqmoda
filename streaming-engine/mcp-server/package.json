@@ -1,0 +1,47 @@
+{
+  "name": "@streaming-engine/mcp-server",
+  "version": "1.0.0",
+  "description": "MCP server for streaming engine audio processing - connect LLMs to your audio processing server",
+  "main": "index.js",
+  "type": "module",
+  "bin": {
+    "streaming-engine-mcp": "./cli.js"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo 'Testing MCP server syntax...' && node --check index.js && node --check cli.js && echo '✅ Syntax validation passed'",
+    "prepublishOnly": "chmod +x cli.js"
+  },
+  "keywords": [
+    "mcp",
+    "audio",
+    "processing",
+    "streaming",
+    "llm",
+    "claude",
+    "ffmpeg"
+  ],
+  "author": "Johannes Naylor <jonaylor89@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jonaylor89/freqmoda.git",
+    "directory": "mcp-server"
+  },
+  "homepage": "https://github.com/jonaylor89/freqmoda#readme",
+  "bugs": {
+    "url": "https://github.com/jonaylor89/freqmoda/issues"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^0.6.0",
+    "axios": "^1.6.0"
+  },
+  "files": [
+    "index.js",
+    "cli.js",
+    "README.md"
+  ]
+}
