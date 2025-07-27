@@ -14,14 +14,8 @@ cargo run --features filesystem
 ```
 
 ### MCP Integration (Connect to LLMs)
-```sh
-# Start server, then in another terminal:
-npx @streaming-engine/mcp-server
 
-# Or connect to deployed server:
-npx @streaming-engine/mcp-server --server=https://your-app.run.app
-```
-See [MCP_INTEGRATION.md](MCP_INTEGRATION.md) for Claude Desktop setup.
+See [MCP README](./mcp-server/README.md)
 
 Original audio test file:
 ```
@@ -30,10 +24,10 @@ https://raw.githubusercontent.com/jonaylor89/freqmoda/main/streaming-engine/test
 
 Try out the following audio manipulation requests:
 ```
-http://localhost:8080/unsafe/https://raw.githubusercontent.com/jonaylor89/freqmoda/main/streaming-engine/main/testdata/celtic_pt2.mp3
-http://localhost:8080/unsafe/https://raw.githubusercontent.com/jonaylor89/freqmoda/main/streaming-engine/main/testdata/celtic_pt2.mp3?reverse=true
-http://localhost:8080/unsafe/https://raw.githubusercontent.com/jonaylor89/freqmoda/main/streaming-engine/main/testdata/celtic_pt2.mp3?start_time=0&duration=10
-http://localhost:8080/unsafe/https://raw.githubusercontent.com/jonaylor89/freqmoda/main/streaming-engine/main/testdata/celtic_pt2.mp3?reverse=true&fade_in=1&fade_out=1&speed=0.8
+http://localhost:8080/unsafe/https://raw.githubusercontent.com/jonaylor89/freqmoda/main/streaming-engine/testdata/celtic_pt2.mp3
+http://localhost:8080/unsafe/https://raw.githubusercontent.com/jonaylor89/freqmoda/main/streaming-engine/testdata/celtic_pt2.mp3?reverse=true
+http://localhost:8080/unsafe/https://raw.githubusercontent.com/jonaylor89/freqmoda/main/streaming-engine/testdata/celtic_pt2.mp3?start_time=0&duration=10
+http://localhost:8080/unsafe/https://raw.githubusercontent.com/jonaylor89/freqmoda/main/streaming-engine/testdata/celtic_pt2.mp3?reverse=true&fade_in=1&fade_out=1&speed=0.8
 ```
 
 ## Streaming Engine API

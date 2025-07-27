@@ -27,10 +27,28 @@ A Rust-based gateway service that:
                                 v
                         +-------+-------+
                         |               |
-                        |  AudioStream  |
-                        |  Server       |
+                        |  Streaming    |
+                        |  Engine       |
+                        |               |
+                        +-------+-------+
+                                ^
+                                |
+                        +-------+-------+
+                        |               |
+                        |  MCP Server   |
+                        |  (Node.js)    |
                         |               |
                         +---------------+
+                                ^
+                                |
+                    +-----------+-----------+
+                    |                       |
+            +-------+-------+       +-------+-------+
+            |               |       |               |
+            |  Claude       |       |  Other LLMs   |
+            |  Desktop      |       |  (via MCP)    |
+            |               |       |               |
+            +---------------+       +---------------+
 ```
 
 ## Technical Stack
@@ -216,9 +234,10 @@ CREATE TABLE audio_samples (
 
 The system provides a public library of 10 high-quality audio samples stored on Google Cloud Storage:
 
-The system will be seeded with 10 high-quality audio samples stored on Google Cloud Storage:
+The system is seeded with 10 high-quality audio samples:
 
--- Sample seed data
+```sql
+-- Sample seed data (implemented in gateway-service/src/database.rs)
 INSERT INTO audio_samples (streaming_key, title, duration, file_type) VALUES
 ('sample1.mp3', 'Sample 1', 8.0,  'audio/mpeg'),
 ('sample2.mp3', 'Sample 2', 12.5, 'audio/mpeg'),
@@ -230,6 +249,7 @@ INSERT INTO audio_samples (streaming_key, title, duration, file_type) VALUES
 ('sample8.mp3', 'Sample 8', 25.5,'audio/mpeg'),
 ('sample9.mp3', 'Sample 9', 18.0, 'audio/mpeg'),
 ('sample10.mp3', 'Sample 10', 15.0, 'audio/mpeg');
+```
 
 These samples serve as a public library for all users to experiment with audio processing. All users will have access to the same set of samples through the web interface. The system does not currently support user uploads or saving modified versions.
 

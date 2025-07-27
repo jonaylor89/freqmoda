@@ -7,8 +7,9 @@ AI-powered audio processing chat application that lets users manipulate audio fi
 
 FreqModa consists of several integrated services:
 
-- **🎵 Streaming Engine**: Core audio processing server (Rust)
-- **🤖 Gateway Service**: AI chat orchestrator with Claude integration (Rust)
+- **Streaming Engine**: Core audio processing server (Rust)
+- **Gateway Service**: AI chat orchestrator with Claude integration (Rust)
+- **MCP Server**: Model Context Protocol integration for direct LLM access (Node.js)
 
 ## Quick Start
 
@@ -42,12 +43,13 @@ Rust-based API gateway that orchestrates communication between Claude AI and the
 
 [📖 Full Documentation](./gateway-service/README.md)
 
-### Web Demo (`web-demo/`)
+### Web Interface
 
-Next.js frontend demonstration of the audio chat capabilities.
+The gateway service includes a built-in web interface available at http://localhost:9000:
 
-- **Port**: 3000
 - **Features**: Chat interface, audio playback, sample library
+- **Demo Mode**: Rate-limited for demonstration purposes
+- **Responsive**: Works on desktop and mobile devices
 
 ## API Examples
 
@@ -91,13 +93,15 @@ curl "http://localhost:8080/meta/unsafe/sample1.mp3"
 The system includes a pre-loaded library of 10 high-quality audio samples:
 
 - **Sample 1**
-- **Sample 2**
+- **Sample 2** 
 - **Sample 3**
-- **Sample 4**
+- **Sample 4** 
 - **Sample 5**
-- **Sample 6**
-- **Sample 7**
-- **Sample 8**
+- **Sample 6** 
+- **Sample 7** 
+- **Sample 8** 
+- **Sample 9**
+- **Sample 10**
 
 ## Development
 
@@ -106,6 +110,10 @@ The system includes a pre-loaded library of 10 high-quality audio samples:
 ```
 freqmoda/
 ├── streaming-engine/          # Core audio processing server
-├── gateway-service/           # AI chat orchestrator
-├── scripts/                   # Development utilities
+│   └── mcp-server/           # MCP integration for direct LLM access
+├── gateway-service/           # AI chat orchestrator  
+├── mcp-server/               # Shared MCP artifacts
+├── scripts/                  # Development utilities
+├── docs/                     # Project documentation
+└── migrations/               # Database schema migrations
 ```

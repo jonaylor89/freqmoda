@@ -42,8 +42,8 @@ posthog:
 You can also configure PostHog using environment variables:
 
 ```bash
-export GATEWAY__POSTHOG__API_KEY="your-posthog-project-api-key"
-export GATEWAY__POSTHOG__HOST="https://app.posthog.com"
+export GATEWAY_POSTHOG__API_KEY="your-posthog-project-api-key"
+export GATEWAY_POSTHOG__HOST="https://app.posthog.com"
 ```
 
 ### 3. Getting Your PostHog API Key
@@ -175,7 +175,7 @@ You can test event tracking by:
 
 ### Configuration Issues
 - Ensure configuration follows the exact YAML structure
-- Check that environment variables use the correct prefix (`GATEWAY__POSTHOG__`)
+- Check that environment variables use the correct prefix (`GATEWAY_POSTHOG__`)
 - Verify the application is reading the configuration correctly by checking logs
 
 ## Advanced Configuration

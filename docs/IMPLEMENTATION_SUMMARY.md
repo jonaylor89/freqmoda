@@ -49,7 +49,7 @@ Complete PostgreSQL schema with:
 - **Users table**: User management (ready for future auth)
 - **Conversations table**: Chat conversation persistence
 - **Messages table**: Individual message storage with role tracking
-- **Audio samples table**: Pre-loaded with 8 high-quality audio samples
+- **Audio samples table**: Pre-loaded with 10 high-quality audio samples
 
 ### 🔧 Developer Experience
 
@@ -91,7 +91,8 @@ The system implements the exact flow described in the design doc:
 ### 📋 Audio Sample Library
 
 Pre-loaded with 10 samples:
-- Sample 1 (8.0s) through Sample 10 (15.0s)
+- Sample 1 (8.0s), Sample 2 (12.5s), Sample 3 (15.2s), Sample 4 (10.0s), Sample 5 (20.0s)
+- Sample 6 (30.0s), Sample 7 (5.8s), Sample 8 (25.5s), Sample 9 (18.0s), Sample 10 (15.0s)
 - Smart name resolution (handles "Sample 1", "sample1", "sample1.mp3")
 - Metadata support for duration and file types
 

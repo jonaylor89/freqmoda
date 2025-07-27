@@ -5,7 +5,7 @@ authors = ["Johannes Naylor <jonaylor89@gmail.com>"]
 readme = "README.md"
 homepage = "https://github.com/jonaylor89/freqmoda"
 repository = "https://github.com/jonaylor89/freqmoda"
-keywords = ["audio", "sound", "server"]
+keywords = ["audio", "sound", "server", "mcp"]
 version = "0.1.0"
 edition = "2024"
 
