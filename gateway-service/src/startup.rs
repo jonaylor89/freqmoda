@@ -17,6 +17,7 @@ use tracing::{debug, info};
 pub struct Application {
     pub port: u16,
     server: Serve<
+        TcpListener,
         IntoMakeServiceWithConnectInfo<Router, SocketAddr>,
         AddExtension<Router, ConnectInfo<SocketAddr>>,
     >,

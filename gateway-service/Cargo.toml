@@ -5,7 +5,7 @@ edition = "2024"
 default-run = "gateway-service"
 
 [dependencies]
-axum = "0.7.7"
+axum = "0.8.4"
 tokio = { version = "1.0", features = ["full"] }
 serde = "1.0.210"
 serde_json = "1.0"

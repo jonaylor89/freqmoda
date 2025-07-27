@@ -170,13 +170,12 @@ where
             get(crate::routes::openapi::get_openapi_schema),
         )
         .route("/", get(root_handler))
-        .route("/params/*streamingpath", get(params))
+        .route("/params/{*streamingpath}", get(params))
         .route_layer(middleware::from_fn(track_metrics))
-        .nest(
-            "/",
+        .merge(
             Router::new()
-                .route("/meta/*streamingpath", get(meta_handler))
-                .route("/*streamingpath", get(streamingpath_handler))
+                .route("/meta/{*streamingpath}", get(meta_handler))
+                .route("/{*streamingpath}", get(streamingpath_handler))
                 .route_layer(middleware::from_fn_with_state(
                     state.clone(),
                     auth_middleware,

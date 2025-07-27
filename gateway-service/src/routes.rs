@@ -26,7 +26,7 @@ use crate::{
 pub fn create_router(state: AppState) -> Router {
     // Routes that need rate limiting (chat and API endpoints)
     let rate_limited_routes = Router::new()
-        .route("/sample/:sample_id/chat", post(sample_chat_form_handler))
+        .route("/sample/{sample_id}/chat", post(sample_chat_form_handler))
         .route("/chat", post(chat_form_handler))
         .route("/api/chat", post(chat))
         .route("/api/audio/process", post(process_audio))
@@ -42,16 +42,15 @@ pub fn create_router(state: AppState) -> Router {
         .route("/ping", get(pong))
         // HTML interface
         .route("/", get(index_page))
-        .route("/sample/:sample_id", get(sample_chat_page))
+        .route("/sample/{sample_id}", get(sample_chat_page))
         .route("/chat", get(chat_page))
-        .route("/download/:filename", get(download_audio))
-
+        .route("/download/{filename}", get(download_audio))
         .route("/api/audio/samples", get(list_audio_samples))
         // PostHog reverse proxy routes
-        .route("/relay-TVmB/static/*path", get(proxy_posthog_static))
-        .route("/relay-TVmB/*path", get(proxy_posthog_api))
-        .route("/relay-TVmB/*path", post(proxy_posthog_api))
-        .route("/relay-TVmB/*path", options(proxy_posthog_options))
+        .route("/relay-TVmB/static/{*path}", get(proxy_posthog_static))
+        .route("/relay-TVmB/{*path}", get(proxy_posthog_api))
+        .route("/relay-TVmB/{*path}", post(proxy_posthog_api))
+        .route("/relay-TVmB/{*path}", options(proxy_posthog_options))
         // Static file serving for SEO assets, favicons, etc.
         .nest_service("/static", ServeDir::new("static"))
         // Serve favicon.ico at root level
