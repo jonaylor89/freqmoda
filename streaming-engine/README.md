@@ -30,6 +30,61 @@ http://localhost:8080/unsafe/https://raw.githubusercontent.com/jonaylor89/freqmo
 http://localhost:8080/unsafe/https://raw.githubusercontent.com/jonaylor89/freqmoda/main/streaming-engine/testdata/celtic_pt2.mp3?reverse=true&fade_in=1&fade_out=1&speed=0.8
 ```
 
+## Request Handler (Pseudocode)
+
+```python
+def handle_audio_request(path, query, state):
+    """Main handler for audio processing requests"""
+
+    # 1. Parse and validate URL path
+    auth_mode, audio_path = parse_path(path)
+
+    # 2. Authenticate request
+    if auth_mode.is_signed():
+        validate_hmac_signature(auth_mode.hash, query)
+    elif auth_mode.is_unsafe():
+        check_unsafe_mode_enabled()
+    else:
+        raise AuthenticationError("Invalid auth mode")
+
+    # 3. Generate cache key from request
+    cache_key = generate_cache_key(audio_path, query)
+
+    # 4. Check cache first
+    cached_audio = state.cache.get(cache_key)
+    if cached_audio:
+        return stream_cached_audio(cached_audio)
+
+    # 5. Resolve audio source from storage
+    audio_source = await state.storage.resolve_audio(audio_path)
+
+    # 6. Parse audio processing parameters
+    params = AudioParams.from_query(query)
+
+    # 7. Build FFmpeg filter chain
+    filter_chain = EffectChainBuilder()
+                   .add_effects(params.effects)
+                   .add_time_ops(params.time_ops)
+                   .add_volume_ops(params.volume_ops)
+                   .build()
+
+    # 8. Process audio with FFmpeg
+    processed_stream = AudioProcessor()
+                             .input(audio_source)
+                             .filters(filter_chain)
+                             .output_format(params.format)
+                             .process_async()
+
+    # 9. Cache result (if enabled)
+    if state.config.cache_enabled:
+        state.cache.store(cache_key, processed_stream)
+
+    # 10. Stream response to client
+    return (StreamingResponse(processed_stream)
+           .content_type(params.format.mime_type())
+           .header("Transfer-Encoding", "chunked"))
+```
+
 ## Streaming Engine API
 
 The Streaming Engine endpoint follows this URL structure:
