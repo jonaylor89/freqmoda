@@ -1,0 +1,62 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        INSERT INTO audio_versions (sample_id, session_id, conversation_id, audio_url, description)\n        VALUES ($1, $2, $3, $4, $5)\n        RETURNING *\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "sample_id",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "session_id",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "conversation_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 4,
+        "name": "audio_url",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 5,
+        "name": "description",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 6,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Varchar",
+        "Varchar",
+        "Uuid",
+        "Varchar",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      false,
+      true,
+      false
+    ]
+  },
+  "hash": "46eda5d6ee3aea703bae3957c95f27456ed27fdac962da695310ea471fc804fd"
+}

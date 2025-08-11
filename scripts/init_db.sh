@@ -27,6 +27,7 @@ DB_PORT="${POSTGRES_PORT:=5432}"
 if [[ -z "${SKIP_DOCKER}" ]]
 then
 docker run \
+    --name "postgres_$(date '+%s')" \
     -e POSTGRES_USER=${DB_USER} \
     -e POSTGRES_PASSWORD=${DB_PASSWORD} \
     -e POSTGRES_DB=${DB_NAME} \
@@ -48,6 +49,6 @@ done
 export DATABASE_URL=postgres://${DB_USER}:${DB_PASSWORD}@localhost:${DB_PORT}/${DB_NAME}
 
 sqlx database create --database-url=${DATABASE_URL}
-sqlx  migrate run --database-url=${DATABASE_URL}
+sqlx migrate run --database-url=${DATABASE_URL}
 
 >&2 echo "Postgres has been migrated, ready to go!"

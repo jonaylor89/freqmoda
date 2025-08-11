@@ -1,0 +1,59 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT * FROM audio_versions\n        WHERE sample_id = $1 AND session_id = $2\n        ORDER BY created_at DESC\n        LIMIT 1\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "sample_id",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "session_id",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "conversation_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 4,
+        "name": "audio_url",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 5,
+        "name": "description",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 6,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      false,
+      true,
+      false
+    ]
+  },
+  "hash": "43d7ee1f59f16cbe3caf19e8d2f665ea60f2c016af68263d15b1c8ae039db286"
+}

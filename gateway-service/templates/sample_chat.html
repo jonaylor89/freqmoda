@@ -329,7 +329,7 @@
                                 <i data-lucide="download" class="w-4 h-4"></i>
                                 <span>Download</span>
                             </button>
-                            <button class="lg:hidden btn-primary text-white px-3 py-2 rounded-lg text-sm font-medium transition-smooth"
+                            <button id="version-toggle-btn" class="hidden lg:hidden btn-primary text-white px-3 py-2 rounded-lg text-sm font-medium transition-smooth"
                                     onclick="toggleVersionSidebar()">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
@@ -346,10 +346,6 @@
                                     <div class="animate-spin-slow w-5 h-5 border-2 border-gray-300 border-t-blue-500 rounded-full"></div>
                                     <span class="text-sm">Loading waveform...</span>
                                 </div>
-                            </div>
-                            <!-- Debug URL link -->
-                            <div class="mt-2 text-xs text-gray-500">
-                                Debug: <a href="{{ streaming_engine_base_url }}/unsafe/{{ sample.streaming_key }}" target="_blank" class="text-blue-500 underline">{{ streaming_engine_base_url }}/unsafe/{{ sample.streaming_key }}</a>
                             </div>
                         </div>
                     </div>
@@ -373,25 +369,25 @@
                                     <div class="space-y-3">
                                         <div class="text-sm font-medium text-gray-700 mb-3">Try these examples:</div>
                                         <div class="space-y-2">
-                                            <button onclick="fillExample('Make a TikTok version of this song'); trackExampleClick('tiktok')"
+                                            <button onclick="fillExample('Reverse and add echo'); trackExampleClick('reverse_echo')"
                                                     class="w-full p-4 bg-white border border-gray-200 rounded-xl text-left hover:border-primary hover:bg-primary/5 transition-smooth group">
                                                 <div class="flex items-center space-x-3">
-                                                    <i data-lucide="smartphone" class="w-6 h-6"></i>
-                                                    <span class="font-medium group-hover:text-primary">"Make a TikTok version of this song"</span>
+                                                    <span class="text-xl">💫</span>
+                                                    <span class="font-medium group-hover:text-primary">"Reverse and add echo"</span>
                                                 </div>
                                             </button>
-                                            <button onclick="fillExample('Transform this into a lo-fi chill version'); trackExampleClick('lofi')"
+                                            <button onclick="fillExample('Make it play faster with a fade in'); trackExampleClick('speed_fade')"
                                                     class="w-full p-4 bg-white border border-gray-200 rounded-xl text-left hover:border-secondary hover:bg-secondary/5 transition-smooth group">
                                                 <div class="flex items-center space-x-3">
-                                                    <i data-lucide="coffee" class="w-6 h-6"></i>
-                                                    <span class="font-medium group-hover:text-secondary">"Transform this into a lo-fi chill version"</span>
+                                                    <span class="text-xl">⚡</span>
+                                                    <span class="font-medium group-hover:text-secondary">"Make play faster with a fade in"</span>
                                                 </div>
                                             </button>
-                                            <button onclick="fillExample('Make it sound like it\'s playing in a large cathedral'); trackExampleClick('cathedral')"
+                                            <button onclick="fillExample('Add chorus effect'); trackExampleClick('chorus_effect')"
                                                     class="w-full p-4 bg-white border border-gray-200 rounded-xl text-left hover:border-accent hover:bg-accent/5 transition-smooth group">
                                                 <div class="flex items-center space-x-3">
-                                                    <i data-lucide="church" class="w-6 h-6"></i>
-                                                    <span class="font-medium group-hover:text-accent">"Make it sound like it's playing in a large cathedral"</span>
+                                                    <span class="text-xl">🎶</span>
+                                                    <span class="font-medium group-hover:text-accent">"Add chorus effect"</span>
                                                 </div>
                                             </button>
                                         </div>
@@ -442,10 +438,16 @@
 
                                             <!-- Add version to history when audio is present -->
                                             {% if !message.audio_url.is_empty() %}
+                                            <div data-audio-url="{{ message.audio_url }}" style="display: none;"></div>
                                             <script>
-                                                // Add this version to the history when the page loads
+                                                // Add this version to the history when the page loads (if versioning is enabled)
                                                 window.addEventListener('DOMContentLoaded', () => {
-                                                    addVersionToHistory('{{ message.content }}', '{{ message.audio_url }}');
+                                                    // Delay to ensure feature flag check has completed
+                                                    setTimeout(() => {
+                                                        if (window.versioningEnabled) {
+                                                            addVersionToHistory('{{ message.content }}', '{{ message.audio_url }}');
+                                                        }
+                                                    }, 500);
                                                 });
                                             </script>
                                             {% endif %}
@@ -518,7 +520,7 @@
             </div>
 
             <!-- Version History Sidebar -->
-            <div id="version-sidebar" class="version-sidebar w-80 bg-white border-l border-gray-200 shadow-xl lg:translate-x-0 fixed lg:relative right-0 top-0 h-full z-50 lg:z-auto">
+            <div id="version-sidebar" class="hidden version-sidebar w-80 bg-white border-l border-gray-200 shadow-xl fixed lg:relative right-0 top-0 h-full z-50 lg:z-auto" style="display: none;">
                 <div class="flex flex-col h-full">
                     <!-- Sidebar Header -->
                     <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
@@ -581,7 +583,7 @@
     </div>
 
     <!-- Overlay for mobile sidebar -->
-    <div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden hidden" onclick="toggleVersionSidebar()"></div>
+    <div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden" style="display: none;" onclick="toggleVersionSidebar()"></div>
 
     <script>
         let currentWavesurfer = null;
@@ -589,33 +591,123 @@
         let versionHistory = [];
         let activeVersionIndex = 0;
         let isWavesurferLoading = false;
+        let versioningEnabled = false;
+
+        // Helper function to get the latest audio URL from messages
+        function getLatestAudioUrl() {
+            // Look for the last message with an audio URL
+            const audioElements = document.querySelectorAll('[data-audio-url]');
+            if (audioElements.length > 0) {
+                const lastElement = audioElements[audioElements.length - 1];
+                return lastElement.getAttribute('data-audio-url');
+            }
+            // Fallback to original sample if no processed versions exist
+            return '{{ streaming_engine_base_url }}/unsafe/{{ sample.streaming_key }}';
+        }
 
         // Initialize with server-rendered data
         window.addEventListener('DOMContentLoaded', () => {
             console.log('DOM Content Loaded - initializing waveform');
 
-            // Check if WaveSurfer is available
-            if (typeof WaveSurfer === 'undefined') {
-                console.error('WaveSurfer is not loaded');
-                document.getElementById('main-waveform').innerHTML = `
-                    <div class="flex items-center justify-center h-20 text-red-600">
-                        <span class="text-sm">WaveSurfer library not loaded</span>
-                    </div>
-                `;
-                return;
+            // Default to versioning disabled
+            window.versioningEnabled = false;
+
+            // Function to initialize the audio player
+            function initializeAudioPlayer() {
+                // Check if WaveSurfer is available
+                if (typeof WaveSurfer === 'undefined') {
+                    console.error('WaveSurfer is not loaded');
+                    document.getElementById('main-waveform').innerHTML = `
+                        <div class="flex items-center justify-center h-20 text-red-600">
+                            <span class="text-sm">WaveSurfer library not loaded</span>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Initialize based on versioning state
+                if (window.versioningEnabled) {
+                    console.log('Initializing WITH versioning');
+                    buildVersionHistoryFromDOM();
+                    // Initialize with original version
+                    if (versionHistory.length > 0) {
+                        console.log('Initializing with first version:', versionHistory[0]);
+                        initializeMainWaveform(versionHistory[0].audioUrl);
+                        setActiveVersion(0);
+                    } else {
+                        console.error('No versions found in history');
+                    }
+                } else {
+                    // Simple initialization without versioning - use the latest version
+                    const latestUrl = getLatestAudioUrl();
+                    console.log('Initializing without versioning (latest version):', latestUrl);
+                    currentVersionUrl = latestUrl; // Set this first to ensure download works
+                    initializeMainWaveform(latestUrl);
+                    // Update title to show it's the current version
+                    document.getElementById('current-version-title').textContent = 'Current Version';
+                }
             }
 
-            buildVersionHistoryFromDOM();
+            // Check for versioning feature flag
+            {% if posthog_api_key.is_some() %}
+            if (typeof posthog !== 'undefined') {
+                // Wait for PostHog to be ready
+                posthog.onFeatureFlags(function() {
+                    // Check if audio versioning is enabled
+                    const isVersioningEnabled = posthog.isFeatureEnabled('audio-versioning');
+                    console.log('PostHog feature flags loaded. Audio versioning:', isVersioningEnabled);
+                    window.versioningEnabled = isVersioningEnabled;
 
-            // Initialize with original version
-            if (versionHistory.length > 0) {
-                console.log('Initializing with first version:', versionHistory[0]);
-                initializeMainWaveform(versionHistory[0].audioUrl);
-                setActiveVersion(0);
+                    if (isVersioningEnabled) {
+                        enableVersioning();
+                    }
+
+                    // Initialize audio player after feature flag check
+                    initializeAudioPlayer();
+                });
+
+                // Fallback: If flags don't load within 2 seconds, proceed without versioning
+                setTimeout(() => {
+                    if (typeof currentWavesurfer === 'undefined' || currentWavesurfer === null) {
+                        console.log('PostHog flags timeout - proceeding without versioning');
+                        window.versioningEnabled = false;
+                        initializeAudioPlayer();
+                    }
+                }, 2000);
             } else {
-                console.error('No versions found in history');
+                // If PostHog isn't available, proceed immediately without versioning
+                console.log('PostHog not available - versioning disabled');
+                window.versioningEnabled = false;
+                initializeAudioPlayer();
             }
+            {% else %}
+            // If PostHog isn't configured, proceed immediately without versioning
+            console.log('PostHog not configured - versioning disabled');
+            window.versioningEnabled = false;
+            initializeAudioPlayer();
+            {% endif %}
         });
+
+        function enableVersioning() {
+            window.versioningEnabled = true;
+            // Show version sidebar
+            const sidebar = document.getElementById('version-sidebar');
+            if (sidebar) {
+                sidebar.classList.remove('hidden');
+            }
+            // Show mobile toggle button
+            const toggleBtn = document.getElementById('version-toggle-btn');
+            if (toggleBtn) {
+                toggleBtn.classList.remove('hidden');
+            }
+            // Show overlay element (but keep it hidden until needed)
+            const overlay = document.getElementById('sidebar-overlay');
+            if (overlay) {
+                overlay.style.display = ''; // Remove inline style but keep hidden class
+                overlay.classList.add('hidden');
+            }
+            console.log('Versioning UI enabled');
+        }
 
         function buildVersionHistoryFromDOM() {
             versionHistory = [];
@@ -631,6 +723,9 @@
         }
 
         function addVersionToHistory(description, audioUrl) {
+            // Only add versions if versioning is enabled
+            if (!versioningEnabled) return;
+
             // Check if this version already exists
             const exists = versionHistory.some(v => v.audioUrl === audioUrl);
             if (exists) return;
@@ -823,10 +918,10 @@
             try {
                 if (currentWavesurfer.isPlaying()) {
                     currentWavesurfer.pause();
-                    trackAudioAction('pause', activeVersionIndex);
+                    trackAudioAction('pause', versioningEnabled ? activeVersionIndex : 0);
                 } else {
                     currentWavesurfer.play();
-                    trackAudioAction('play', activeVersionIndex);
+                    trackAudioAction('play', versioningEnabled ? activeVersionIndex : 0);
                 }
             } catch (error) {
                 console.error('Error toggling audio:', error);
@@ -844,6 +939,9 @@
         }
 
         function setActiveVersion(index) {
+            // Skip if versioning is disabled
+            if (!versioningEnabled) return;
+
             if (index < 0 || index >= versionHistory.length) return;
 
             activeVersionIndex = index;
@@ -872,16 +970,30 @@
         }
 
         function downloadCurrentVersion() {
-            if (currentVersionUrl) {
-                trackAudioDownload(activeVersionIndex, versionHistory[activeVersionIndex]?.description);
+            // Ensure we have a URL to download
+            let downloadUrl = currentVersionUrl;
+            if (!downloadUrl && !versioningEnabled) {
+                // Get the latest audio URL if versioning is disabled
+                downloadUrl = getLatestAudioUrl();
+            }
+
+            if (downloadUrl) {
+                if (versioningEnabled) {
+                    trackAudioDownload(activeVersionIndex, versionHistory[activeVersionIndex]?.description);
+                } else {
+                    trackAudioDownload(0, 'Current Version');
+                }
                 const link = document.createElement('a');
-                link.href = currentVersionUrl;
+                link.href = downloadUrl;
                 link.download = `audio-agent-demo-${Date.now()}.mp3`;
                 link.click();
             }
         }
 
         function toggleVersionSidebar() {
+            // Only allow if versioning is enabled
+            if (!versioningEnabled) return;
+
             const sidebar = document.getElementById('version-sidebar');
             const overlay = document.getElementById('sidebar-overlay');
 
@@ -1106,10 +1218,14 @@
         function trackAudioAction(action, versionIndex) {
             {% if posthog_api_key.is_some() %}
             if (typeof posthog !== 'undefined') {
+                const versionDesc = versioningEnabled && versionHistory[versionIndex]
+                    ? versionHistory[versionIndex].description
+                    : 'Current Version';
                 posthog.capture('audio_' + action, {
                     version_index: versionIndex,
                     sample_key: '{{ sample.streaming_key }}',
-                    version_description: versionHistory[versionIndex]?.description
+                    version_description: versionDesc,
+                    versioning_enabled: versioningEnabled
                 });
             }
             {% endif %}
@@ -1117,11 +1233,12 @@
 
         function trackVersionSelection(index, description) {
             {% if posthog_api_key.is_some() %}
-            if (typeof posthog !== 'undefined') {
+            if (typeof posthog !== 'undefined' && versioningEnabled) {
                 posthog.capture('version_selected', {
                     version_index: index,
                     version_description: description,
-                    sample_key: '{{ sample.streaming_key }}'
+                    sample_key: '{{ sample.streaming_key }}',
+                    versioning_enabled: true
                 });
             }
             {% endif %}
@@ -1132,8 +1249,9 @@
             if (typeof posthog !== 'undefined') {
                 posthog.capture('audio_downloaded', {
                     version_index: versionIndex,
-                    version_description: description,
-                    sample_key: '{{ sample.streaming_key }}'
+                    version_description: description || 'Current Version',
+                    sample_key: '{{ sample.streaming_key }}',
+                    versioning_enabled: versioningEnabled
                 });
             }
             {% endif %}
@@ -1141,10 +1259,11 @@
 
         function trackSidebarToggle(isOpening) {
             {% if posthog_api_key.is_some() %}
-            if (typeof posthog !== 'undefined') {
+            if (typeof posthog !== 'undefined' && versioningEnabled) {
                 posthog.capture('sidebar_toggled', {
                     action: isOpening ? 'open' : 'close',
-                    sample_key: '{{ sample.streaming_key }}'
+                    sample_key: '{{ sample.streaming_key }}',
+                    versioning_enabled: true
                 });
             }
             {% endif %}

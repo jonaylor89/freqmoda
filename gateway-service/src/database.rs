@@ -7,7 +7,11 @@ use uuid::Uuid;
 
 pub fn get_connection_pool(configuration: &DatabaseSettings) -> PgPool {
     PgPoolOptions::new()
-        .acquire_timeout(std::time::Duration::from_secs(2))
+        .max_connections(10)
+        .min_connections(2)
+        .acquire_timeout(std::time::Duration::from_secs(10))
+        .idle_timeout(std::time::Duration::from_secs(600))
+        .max_lifetime(std::time::Duration::from_secs(1800))
         .connect_lazy_with(configuration.with_db())
 }
 
@@ -229,7 +233,7 @@ pub async fn get_audio_versions_for_session(
     let result = sqlx::query_as!(
         AudioVersion,
         r#"
-        SELECT * FROM audio_versions 
+        SELECT * FROM audio_versions
         WHERE sample_id = $1 AND session_id = $2
         ORDER BY created_at ASC
         "#,
@@ -250,7 +254,7 @@ pub async fn get_latest_audio_version(
     let result = sqlx::query_as!(
         AudioVersion,
         r#"
-        SELECT * FROM audio_versions 
+        SELECT * FROM audio_versions
         WHERE sample_id = $1 AND session_id = $2
         ORDER BY created_at DESC
         LIMIT 1
