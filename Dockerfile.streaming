@@ -1,9 +1,118 @@
+# Stage 1: Build static FFmpeg with required codecs
+FROM debian:bookworm-slim AS ffmpeg-build
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    pkg-config \
+    yasm \
+    nasm \
+    curl \
+    ca-certificates \
+    libz-dev \
+    libbz2-dev \
+    liblzma-dev \
+    libmp3lame-dev \
+    libvorbis-dev \
+    libopus-dev \
+    libfdk-aac-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /ffmpeg
+
+# Download and build FFmpeg statically
+ARG FFMPEG_VERSION=6.1
+RUN curl -L https://ffmpeg.org/releases/ffmpeg-${FFMPEG_VERSION}.tar.bz2 | tar xj --strip-components=1
+
+RUN ./configure \
+    --prefix=/opt/ffmpeg \
+    --enable-static \
+    --disable-shared \
+    --disable-programs \
+    --disable-doc \
+    --disable-htmlpages \
+    --disable-manpages \
+    --disable-podpages \
+    --disable-txtpages \
+    --enable-pic \
+    --enable-gpl \
+    --enable-nonfree \
+    --enable-libmp3lame \
+    --enable-libvorbis \
+    --enable-libopus \
+    --enable-libfdk-aac \
+    --disable-debug \
+    --disable-ffplay \
+    --disable-ffprobe \
+    --disable-network \
+    --disable-devices \
+    --disable-filters \
+    --enable-filter=abuffer \
+    --enable-filter=abuffersink \
+    --enable-filter=aformat \
+    --enable-filter=anull \
+    --enable-filter=atempo \
+    --enable-filter=areverse \
+    --enable-filter=volume \
+    --enable-filter=loudnorm \
+    --enable-filter=lowpass \
+    --enable-filter=highpass \
+    --enable-filter=bandpass \
+    --enable-filter=bass \
+    --enable-filter=treble \
+    --enable-filter=aecho \
+    --enable-filter=chorus \
+    --enable-filter=flanger \
+    --enable-filter=aphaser \
+    --enable-filter=tremolo \
+    --enable-filter=acompressor \
+    --enable-filter=anlmdn \
+    --enable-filter=afade \
+    --enable-filter=acrossfade \
+    --enable-filter=aresample \
+    && make -j$(nproc) \
+    && make install
+
+# Create pkg-config files for static linking
+RUN mkdir -p /opt/ffmpeg/lib/pkgconfig && \
+    for lib in avformat avcodec avfilter swresample avutil; do \
+        echo "prefix=/opt/ffmpeg" > /opt/ffmpeg/lib/pkgconfig/lib${lib}.pc && \
+        echo "libdir=\${prefix}/lib" >> /opt/ffmpeg/lib/pkgconfig/lib${lib}.pc && \
+        echo "includedir=\${prefix}/include" >> /opt/ffmpeg/lib/pkgconfig/lib${lib}.pc && \
+        echo "" >> /opt/ffmpeg/lib/pkgconfig/lib${lib}.pc && \
+        echo "Name: lib${lib}" >> /opt/ffmpeg/lib/pkgconfig/lib${lib}.pc && \
+        echo "Description: FFmpeg ${lib} library" >> /opt/ffmpeg/lib/pkgconfig/lib${lib}.pc && \
+        echo "Version: ${FFMPEG_VERSION}" >> /opt/ffmpeg/lib/pkgconfig/lib${lib}.pc && \
+        echo "Libs: -L\${libdir} -l${lib}" >> /opt/ffmpeg/lib/pkgconfig/lib${lib}.pc && \
+        echo "Cflags: -I\${includedir}" >> /opt/ffmpeg/lib/pkgconfig/lib${lib}.pc; \
+    done
+
+# -----------------------------
 
 FROM lukemathwalker/cargo-chef:latest-rust-1.87.0 AS chef
 
 WORKDIR /app
 
-RUN apt update && apt install lld clang -y
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    lld \
+    clang \
+    libclang-dev \
+    pkg-config \
+    libz-dev \
+    libbz2-dev \
+    liblzma-dev \
+    libmp3lame-dev \
+    libvorbis-dev \
+    libopus-dev \
+    libfdk-aac-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy FFmpeg from build stage
+COPY --from=ffmpeg-build /opt/ffmpeg /opt/ffmpeg
+
+# Set environment for FFmpeg
+ENV FFMPEG_DIR=/opt/ffmpeg
+ENV FFMPEG_STATIC=1
+ENV PKG_CONFIG_PATH=/opt/ffmpeg/lib/pkgconfig:$PKG_CONFIG_PATH
 
 # -----------------------------
 
@@ -19,6 +128,7 @@ FROM chef AS builder
 
 COPY --from=planner /app/recipe.json recipe.json
 
+# Build dependencies with FFmpeg static linking
 RUN cargo chef cook --release --recipe-path recipe.json --features gcs
 
 COPY . .
@@ -32,8 +142,7 @@ FROM debian:bookworm-slim AS runtime
 WORKDIR /app
 
 RUN apt-get update -y \
-    && apt-get install -y --no-install-recommends openssl ca-certificates ffmpeg curl \
-    # Clean up
+    && apt-get install -y --no-install-recommends openssl ca-certificates curl \
     && apt-get autoremove -y \
     && apt-get clean -y \
     && rm -rf /var/lib/apt/lists/*

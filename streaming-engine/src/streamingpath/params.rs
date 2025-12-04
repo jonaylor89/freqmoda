@@ -1,8 +1,3 @@
-use std::{
-    collections::HashMap,
-    fmt::{self, Display},
-    str::FromStr,
-};
 use axum::{
     extract::FromRequestParts,
     http::{StatusCode, request::Parts},
@@ -10,6 +5,11 @@ use axum::{
 use base64::{Engine as _, engine::general_purpose};
 use color_eyre::{Result, eyre};
 use serde::{Deserialize, Serialize};
+use std::{
+    collections::HashMap,
+    fmt::{self, Display},
+    str::FromStr,
+};
 use tracing::info;
 use url::form_urlencoded;
 use utoipa::ToSchema;

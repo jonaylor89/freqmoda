@@ -1,0 +1,17 @@
+[package]
+name = "ffmpeg-sys"
+version = "0.1.0"
+edition = "2021"
+description = "Raw FFI bindings to FFmpeg/libav libraries"
+publish = false
+
+[lib]
+name = "ffmpeg_sys"
+path = "src/lib.rs"
+
+[dependencies]
+libc = "0.2"
+
+[build-dependencies]
+bindgen = "0.70"
+pkg-config = "0.3"

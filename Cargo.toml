@@ -1,5 +1,7 @@
 [workspace]
 members = [
+    "crates/ffmpeg",
+    "crates/ffmpeg-sys",
     "gateway-service",
     "streaming-engine",
 ]

@@ -80,8 +80,6 @@ pub struct ChatForm {
     message: String,
 }
 
-
-
 #[instrument(skip(state))]
 pub async fn index_page(State(state): State<AppState>) -> Result<Html<String>, StatusCode> {
     let samples = get_all_audio_samples(&state.db).await.map_err(|e| {
@@ -917,5 +915,3 @@ fn parse_structured_message(content: &str, base_url: &str) -> (String, Option<St
     tracing::debug!("No structured format found, using fallback");
     (content.to_string(), None)
 }
-
-

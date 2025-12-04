@@ -361,7 +361,7 @@ version = "0.29.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "61b1d86e7705efe1be1b569bab41d4fa1e14e220b60a160f78de2db687add079"
 dependencies = [
- "bindgen",
+ "bindgen 0.69.5",
  "cc",
  "cmake",
  "dunce",
@@ -848,6 +848,26 @@ dependencies = [
  "shlex",
  "syn 2.0.101",
  "which",
+]
+
+[[package]]
+name = "bindgen"
+version = "0.70.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f49d8fed880d473ea71efb9bf597651e77201bdd4893efe54c9e5d65ae04ce6f"
+dependencies = [
+ "bitflags 2.9.1",
+ "cexpr",
+ "clang-sys",
+ "itertools 0.12.1",
+ "log",
+ "prettyplease",
+ "proc-macro2",
+ "quote",
+ "regex",
+ "rustc-hash 1.1.0",
+ "shlex",
+ "syn 2.0.101",
 ]
 
 [[package]]
@@ -1950,6 +1970,25 @@ checksum = "d013fc25338cc558c5c2cfbad646908fb23591e2404481826742b651c9af7160"
 dependencies = [
  "rand_core 0.6.4",
  "subtle",
+]
+
+[[package]]
+name = "ffmpeg"
+version = "0.1.0"
+dependencies = [
+ "ffmpeg-sys",
+ "libc",
+ "thiserror 1.0.69",
+ "tracing",
+]
+
+[[package]]
+name = "ffmpeg-sys"
+version = "0.1.0"
+dependencies = [
+ "bindgen 0.70.1",
+ "libc",
+ "pkg-config",
 ]
 
 [[package]]
@@ -5671,6 +5710,7 @@ dependencies = [
  "color-eyre",
  "config",
  "dotenvy",
+ "ffmpeg",
  "futures",
  "gethostname 1.0.2",
  "google-cloud-storage",

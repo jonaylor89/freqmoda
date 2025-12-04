@@ -2,7 +2,6 @@ use std::{collections::HashMap, num::NonZeroUsize};
 
 use async_trait::async_trait;
 use color_eyre::Result;
-use tempfile::TempDir;
 use tokio::sync::Semaphore;
 use tracing::{info, instrument};
 
@@ -27,11 +26,9 @@ impl AudioProcessor for Processor {
     #[tracing::instrument(skip(self, blob, params))]
     async fn process(&self, blob: &AudioBuffer, params: &Params) -> Result<AudioBuffer> {
         let _permit = self.semaphore.acquire().await?;
-        info!(params = ?params, "Processing with FFmpeg");
+        info!(params = ?params, "Processing with FFmpeg native bindings");
 
-        let temp_dir = TempDir::new()?;
-
-        let processed_audio = process_audio(blob, params, temp_dir, &self.tags).await?;
+        let processed_audio = process_audio(blob, params, &self.tags).await?;
         info!("Audio processing completed successfully");
 
         Ok(processed_audio)

@@ -23,6 +23,7 @@ gcs = ["dep:google-cloud-storage"]
 s3 = ["dep:aws-sdk-s3"]
 
 [dependencies]
+ffmpeg = { path = "../crates/ffmpeg" }
 tokio = { version = "1.40.0", features = ["full"] }
 tracing = "0.1.37"
 tracing-subscriber = { version = "0.3.17", features = ["env-filter"] }
