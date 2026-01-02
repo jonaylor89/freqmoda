@@ -57,10 +57,8 @@ impl TestDatabase {
             r#"
             CREATE TABLE IF NOT EXISTS users (
                 id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-                email VARCHAR(255) NOT NULL UNIQUE,
-                name VARCHAR(255) NOT NULL,
-                created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-                updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+                username VARCHAR(255) NOT NULL UNIQUE,
+                created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
             )
             "#,
         )
@@ -72,7 +70,7 @@ impl TestDatabase {
             r#"
             CREATE TABLE IF NOT EXISTS conversations (
                 id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-                user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                user_id UUID REFERENCES users(id) ON DELETE SET NULL,
                 title VARCHAR(255),
                 created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
                 updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -90,7 +88,6 @@ impl TestDatabase {
                 conversation_id UUID NOT NULL REFERENCES conversations(id) ON DELETE CASCADE,
                 role VARCHAR(50) NOT NULL CHECK (role IN ('user', 'assistant', 'system')),
                 content TEXT NOT NULL,
-                metadata JSONB,
                 created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
             )
             "#,
@@ -102,17 +99,10 @@ impl TestDatabase {
         sqlx::query(
             r#"
             CREATE TABLE IF NOT EXISTS audio_samples (
-                id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-                name VARCHAR(255) NOT NULL UNIQUE,
-                filename VARCHAR(255) NOT NULL,
-                file_path VARCHAR(500) NOT NULL,
-                duration DECIMAL(10,2) NOT NULL,
-                file_size BIGINT,
-                mime_type VARCHAR(100),
-                sample_rate INTEGER,
-                channels INTEGER,
-                bitrate INTEGER,
-                metadata JSONB,
+                streaming_key VARCHAR(255) PRIMARY KEY,
+                title VARCHAR(255) NOT NULL,
+                duration DOUBLE PRECISION,
+                file_type VARCHAR(100) NOT NULL,
                 created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
             )
             "#,
@@ -120,6 +110,23 @@ impl TestDatabase {
         .execute(pool)
         .await
         .expect("Failed to create audio_samples table");
+
+        sqlx::query(
+            r#"
+            CREATE TABLE IF NOT EXISTS audio_versions (
+                id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+                sample_id VARCHAR(255) NOT NULL REFERENCES audio_samples(streaming_key),
+                session_id VARCHAR(255) NOT NULL,
+                conversation_id UUID REFERENCES conversations(id) ON DELETE SET NULL,
+                audio_url TEXT NOT NULL,
+                description TEXT,
+                created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+            )
+            "#,
+        )
+        .execute(pool)
+        .await
+        .expect("Failed to create audio_versions table");
     }
 
     pub async fn cleanup(&self) {
@@ -127,8 +134,8 @@ impl TestDatabase {
     }
 
     pub async fn seed_test_data(&self) -> TestData {
-        let user_id = self.create_test_user("test@example.com").await;
-        let conversation_id = self.create_test_conversation(user_id).await;
+        let user_id = self.create_test_user("test-user").await;
+        let conversation_id = self.create_test_conversation(Some(user_id)).await;
         let sample_ids = self.create_test_audio_samples().await;
 
         TestData {
@@ -138,18 +145,17 @@ impl TestDatabase {
         }
     }
 
-    async fn create_test_user(&self, email: &str) -> Uuid {
+    async fn create_test_user(&self, username: &str) -> Uuid {
         let user_id = Uuid::new_v4();
 
         sqlx::query(
             r#"
-            INSERT INTO users (id, email, name, created_at)
-            VALUES ($1, $2, $3, NOW())
+            INSERT INTO users (id, username, created_at)
+            VALUES ($1, $2, NOW())
             "#,
         )
         .bind(user_id)
-        .bind(email)
-        .bind("Test User")
+        .bind(username)
         .execute(&self.connection_pool)
         .await
         .expect("Failed to create test user");
@@ -157,7 +163,7 @@ impl TestDatabase {
         user_id
     }
 
-    async fn create_test_conversation(&self, user_id: Uuid) -> Uuid {
+    async fn create_test_conversation(&self, user_id: Option<Uuid>) -> Uuid {
         let conversation_id = Uuid::new_v4();
 
         sqlx::query(
@@ -175,30 +181,29 @@ impl TestDatabase {
         conversation_id
     }
 
-    async fn create_test_audio_samples(&self) -> Vec<Uuid> {
+    async fn create_test_audio_samples(&self) -> Vec<String> {
         let mut sample_ids = Vec::new();
 
         for i in 1..=5 {
-            let sample_id = Uuid::new_v4();
-            let name = format!("Test Sample {}", i);
-            let filename = format!("test_sample_{}.mp3", i);
+            let streaming_key = format!("sample{}.mp3", i);
+            let title = format!("Sample {}", i);
+            let duration = 30.0 + (i as f64) * 5.0;
 
             sqlx::query(
                 r#"
-                INSERT INTO audio_samples (id, name, filename, file_path, duration, created_at)
-                VALUES ($1, $2, $3, $4, $5, NOW())
+                INSERT INTO audio_samples (streaming_key, title, duration, file_type, created_at)
+                VALUES ($1, $2, $3, $4, NOW())
                 "#,
             )
-            .bind(sample_id)
-            .bind(&name)
-            .bind(&filename)
-            .bind(format!("/test/samples/{}", filename))
-            .bind(30.0 + (i as f64) * 5.0)
+            .bind(&streaming_key)
+            .bind(&title)
+            .bind(duration)
+            .bind("audio/mpeg")
             .execute(&self.connection_pool)
             .await
             .expect("Failed to create test audio sample");
 
-            sample_ids.push(sample_id);
+            sample_ids.push(streaming_key);
         }
 
         sample_ids
@@ -239,25 +244,26 @@ impl TestDatabase {
         row.get::<i64, _>("count")
     }
 
-    pub async fn get_audio_sample_by_name(&self, name: &str) -> Option<AudioSampleRecord> {
+    pub async fn get_audio_sample_by_name(&self, title: &str) -> Option<AudioSampleRecord> {
         let result = sqlx::query(
             r#"
-            SELECT id, name, filename, file_path, duration
+            SELECT streaming_key, title, duration::float8 as duration, file_type
             FROM audio_samples
-            WHERE name = $1
+            WHERE title = $1
             "#,
         )
-        .bind(name)
+        .bind(title)
         .fetch_optional(&self.connection_pool)
         .await
         .expect("Failed to fetch audio sample");
 
         result.map(|row| AudioSampleRecord {
-            id: row.get("id"),
-            name: row.get("name"),
-            filename: row.get("filename"),
-            file_path: row.get("file_path"),
-            duration: row.get("duration"),
+            id: row.get("streaming_key"),
+            name: row.get("title"),
+            filename: row.get::<String, _>("streaming_key"),
+            file_path: format!("/test/samples/{}", row.get::<String, _>("streaming_key")),
+            duration: row.get::<f64, _>("duration"),
+            file_type: row.get("file_type"),
         })
     }
 
@@ -301,16 +307,17 @@ impl TestDatabase {
 pub struct TestData {
     pub user_id: Uuid,
     pub conversation_id: Uuid,
-    pub sample_ids: Vec<Uuid>,
+    pub sample_ids: Vec<String>,
 }
 
 #[derive(Debug, Clone)]
 pub struct AudioSampleRecord {
-    pub id: Uuid,
+    pub id: String,
     pub name: String,
     pub filename: String,
     pub file_path: String,
     pub duration: f64,
+    pub file_type: String,
 }
 
 pub async fn spawn_test_database() -> TestDatabase {
@@ -372,12 +379,12 @@ mod tests {
         let test_db = TestDatabase::new().await;
         let _test_data = test_db.seed_test_data().await;
 
-        let sample = test_db.get_audio_sample_by_name("Test Sample 1").await;
+        let sample = test_db.get_audio_sample_by_name("Sample 1").await;
 
         assert!(sample.is_some());
         let sample = sample.unwrap();
-        assert_eq!(sample.name, "Test Sample 1");
-        assert_eq!(sample.filename, "test_sample_1.mp3");
+        assert_eq!(sample.name, "Sample 1");
+        assert_eq!(sample.filename, "sample1.mp3");
 
         test_db.cleanup().await;
     }

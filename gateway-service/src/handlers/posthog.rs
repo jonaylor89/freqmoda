@@ -107,7 +107,7 @@ async fn forward_request(
     headers: HeaderMap,
     body: Option<Bytes>,
 ) -> Result<Response, Box<dyn std::error::Error + Send + Sync>> {
-    let client = reqwest::Client::new();
+    let client = reqwest::Client::builder().no_proxy().build()?;
 
     // Convert axum Method to reqwest Method
     let reqwest_method = match method {

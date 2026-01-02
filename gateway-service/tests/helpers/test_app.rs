@@ -6,6 +6,7 @@ use crate::helpers::{
 };
 use axum::{
     body::Body,
+    extract::ConnectInfo,
     http::{Request, StatusCode},
 };
 use gateway_service::{routes::create_router, state::AppState};
@@ -27,6 +28,7 @@ pub struct TestApp {
 
 impl TestApp {
     pub async fn new() -> Self {
+        crate::helpers::ensure_tracing();
         let db = TestDatabase::new().await;
         let redis = TestRedis::new().await;
         let mocks = MockEnvironment::new().await;
@@ -59,6 +61,7 @@ impl TestApp {
     }
 
     pub async fn new_with_config(config_builder: TestConfigBuilder) -> Self {
+        crate::helpers::ensure_tracing();
         let db = TestDatabase::new().await;
         let redis = TestRedis::new().await;
         let mocks = MockEnvironment::new().await;
@@ -97,6 +100,13 @@ impl TestApp {
     }
 
     // HTTP request helpers
+    fn attach_connect_info(&self, mut request: Request<Body>) -> Request<Body> {
+        request
+            .extensions_mut()
+            .insert(ConnectInfo(self.address));
+        request
+    }
+
     pub async fn get(&self, path: &str) -> TestResponse {
         let request = Request::builder()
             .method("GET")
@@ -106,7 +116,7 @@ impl TestApp {
 
         let router = create_router(self.state.as_ref().clone());
         let response = router
-            .oneshot(request)
+            .oneshot(self.attach_connect_info(request))
             .await
             .expect("Failed to send request");
         TestResponse::new(response).await
@@ -124,7 +134,7 @@ impl TestApp {
 
         let router = create_router(self.state.as_ref().clone());
         let response = router
-            .oneshot(request)
+            .oneshot(self.attach_connect_info(request))
             .await
             .expect("Failed to send request");
         TestResponse::new(response).await
@@ -142,7 +152,7 @@ impl TestApp {
 
         let router = create_router(self.state.as_ref().clone());
         let response = router
-            .oneshot(request)
+            .oneshot(self.attach_connect_info(request))
             .await
             .expect("Failed to send request");
         TestResponse::new(response).await
@@ -160,7 +170,7 @@ impl TestApp {
 
         let router = create_router(self.state.as_ref().clone());
         let response = router
-            .oneshot(request)
+            .oneshot(self.attach_connect_info(request))
             .await
             .expect("Failed to send request");
         TestResponse::new(response).await
@@ -175,7 +185,7 @@ impl TestApp {
 
         let router = create_router(self.state.as_ref().clone());
         let response = router
-            .oneshot(request)
+            .oneshot(self.attach_connect_info(request))
             .await
             .expect("Failed to send request");
         TestResponse::new(response).await
