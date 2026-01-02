@@ -9,6 +9,10 @@ publish = false
 name = "ffmpeg"
 path = "src/lib.rs"
 
+[features]
+default = ["network"]
+network = []
+
 [dependencies]
 ffmpeg-sys = { path = "../ffmpeg-sys" }
 thiserror = "1.0"

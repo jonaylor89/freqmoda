@@ -2,8 +2,8 @@
 
 use crate::error::{check, check_again, FfmpegError};
 use crate::handle::{
-    find_decoder, find_encoder, find_encoder_by_name, get_filter, CodecContext, FilterGraph, Frame,
-    Packet, Resampler,
+    find_decoder, find_encoder_by_name, get_filter, CodecContext, FilterGraph, Frame, Packet,
+    Resampler,
 };
 use crate::io::{InputContext, OutputContext};
 use ffmpeg_sys::*;
