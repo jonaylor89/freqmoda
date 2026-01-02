@@ -4,6 +4,7 @@ use crate::error::{check, FfmpegError};
 use ffmpeg_sys::*;
 use std::ffi::CString;
 use std::io::{Read, Seek, SeekFrom, Write};
+use std::mem;
 use std::os::raw::{c_int, c_void};
 use std::ptr;
 use std::slice;
@@ -275,7 +276,7 @@ impl OutputContext {
                 1, // write mode
                 write_buf as *mut c_void,
                 None, // no read
-                Some(write_callback),
+                Some(mem::transmute(write_callback as unsafe extern "C" fn(*mut c_void, *const u8, c_int) -> c_int)),
                 Some(write_seek_callback),
             )
         };
@@ -423,9 +424,13 @@ extern "C" fn seek_callback(opaque: *mut c_void, offset: i64, whence: c_int) -> 
 }
 
 // FFI callbacks for writing
-unsafe extern "C" fn write_callback(opaque: *mut c_void, buf: *const u8, buf_size: c_int) -> c_int {
+unsafe extern "C" fn write_callback(
+    opaque: *mut c_void,
+    buf: *const u8,
+    buf_size: c_int,
+) -> c_int {
     let writer = unsafe { &mut *(opaque as *mut WriteBuffer) };
-    let slice = unsafe { slice::from_raw_parts(buf, buf_size as usize) };
+    let slice = unsafe { slice::from_raw_parts(buf as *const u8, buf_size as usize) };
     match writer.write(slice) {
         Ok(n) => n as c_int,
         Err(_) => -1,
