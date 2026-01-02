@@ -423,7 +423,7 @@ extern "C" fn seek_callback(opaque: *mut c_void, offset: i64, whence: c_int) -> 
 }
 
 // FFI callbacks for writing
-extern "C" fn write_callback(opaque: *mut c_void, buf: *const u8, buf_size: c_int) -> c_int {
+unsafe extern "C" fn write_callback(opaque: *mut c_void, buf: *const u8, buf_size: c_int) -> c_int {
     let writer = unsafe { &mut *(opaque as *mut WriteBuffer) };
     let slice = unsafe { slice::from_raw_parts(buf, buf_size as usize) };
     match writer.write(slice) {
