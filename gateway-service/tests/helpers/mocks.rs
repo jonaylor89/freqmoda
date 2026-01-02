@@ -1,9 +1,10 @@
+use base64::{Engine as _, engine::general_purpose};
 use serde_json::{Value, json};
 use std::collections::HashMap;
 use uuid::Uuid;
 use wiremock::{
     Mock, MockServer, Request, ResponseTemplate,
-    matchers::{header, method, path, path_regex, query_param},
+    matchers::{header, method, path, path_regex},
 };
 
 pub struct ClaudeMockServer {
@@ -20,6 +21,7 @@ impl ClaudeMockServer {
     }
 
     pub async fn mock_chat_completion_success(&self) -> &Self {
+        self.server.reset().await;
         Mock::given(method("POST"))
             .and(path("/v1/messages"))
             .and(header("content-type", "application/json"))
@@ -61,6 +63,7 @@ impl ClaudeMockServer {
     }
 
     pub async fn mock_chat_completion_with_text_response(&self, response_text: &str) -> &Self {
+        self.server.reset().await;
         Mock::given(method("POST"))
             .and(path("/v1/messages"))
             .and(header("content-type", "application/json"))
@@ -89,6 +92,7 @@ impl ClaudeMockServer {
     }
 
     pub async fn mock_chat_completion_error(&self, status_code: u16, error_message: &str) -> &Self {
+        self.server.reset().await;
         Mock::given(method("POST"))
             .and(path("/v1/messages"))
             .respond_with(ResponseTemplate::new(status_code).set_body_json(json!({
@@ -105,6 +109,7 @@ impl ClaudeMockServer {
     }
 
     pub async fn mock_rate_limit_error(&self) -> &Self {
+        self.server.reset().await;
         Mock::given(method("POST"))
             .and(path("/v1/messages"))
             .respond_with(ResponseTemplate::new(429).set_body_json(json!({
@@ -121,6 +126,7 @@ impl ClaudeMockServer {
     }
 
     pub async fn mock_auth_error(&self) -> &Self {
+        self.server.reset().await;
         Mock::given(method("POST"))
             .and(path("/v1/messages"))
             .respond_with(ResponseTemplate::new(401).set_body_json(json!({
@@ -161,35 +167,41 @@ impl StreamingEngineMockServer {
     }
 
     pub async fn mock_audio_processing_success(&self, audio_filename: &str) -> &Self {
+        // Clear any previous error handlers so success responses take priority
+        self.server.reset().await;
         let processed_url = format!("{}/unsafe/{}", self.base_url, audio_filename);
 
-        Mock::given(method("GET"))
-            .and(path_regex(r"/unsafe/.*"))
-            .respond_with(
-                ResponseTemplate::new(200)
-                    .insert_header("content-type", "audio/mpeg")
-                    .insert_header("x-processed-url", processed_url.as_str())
-                    .set_body_raw("mock-audio-data", "audio/mpeg"),
-            )
-            .mount(&self.server)
-            .await;
+        for verb in ["GET", "HEAD"] {
+            Mock::given(method(verb))
+                .and(path_regex(r"/unsafe/.*"))
+                .respond_with(
+                    ResponseTemplate::new(200)
+                        .insert_header("content-type", "audio/mpeg")
+                        .insert_header("x-processed-url", processed_url.as_str())
+                        .set_body_raw("mock-audio-data", "audio/mpeg"),
+                )
+                .mount(&self.server)
+                .await;
+        }
 
         self
     }
 
     pub async fn mock_metadata_endpoint(&self, audio_filename: &str, duration: f64) -> &Self {
-        Mock::given(method("GET"))
-            .and(path_regex(r"/meta/unsafe/.*"))
-            .respond_with(ResponseTemplate::new(200).set_body_json(json!({
-                "filename": audio_filename,
-                "duration": duration,
-                "format": "mp3",
-                "channels": 2,
-                "sample_rate": 44100,
-                "bitrate": 320000
-            })))
-            .mount(&self.server)
-            .await;
+        for verb in ["GET", "HEAD"] {
+            Mock::given(method(verb))
+                .and(path_regex(r"/meta/unsafe/.*"))
+                .respond_with(ResponseTemplate::new(200).set_body_json(json!({
+                    "filename": audio_filename,
+                    "duration": duration,
+                    "format": "mp3",
+                    "channels": 2,
+                    "sample_rate": 44100,
+                    "bitrate": 320000
+                })))
+                .mount(&self.server)
+                .await;
+        }
 
         self
     }
@@ -207,38 +219,32 @@ impl StreamingEngineMockServer {
     }
 
     pub async fn mock_processing_error(&self) -> &Self {
-        Mock::given(method("GET"))
-            .and(path_regex(r"/unsafe/error.*"))
-            .respond_with(ResponseTemplate::new(500).set_body_json(json!({
-                "error": "Audio processing failed"
-            })))
-            .mount(&self.server)
-            .await;
+        self.server.reset().await;
+        for verb in ["GET", "HEAD"] {
+            Mock::given(method(verb))
+                .and(path_regex(r"/unsafe/.*"))
+                .respond_with(ResponseTemplate::new(500).set_body_json(json!({
+                    "error": "Audio processing failed"
+                })))
+                .mount(&self.server)
+                .await;
+        }
 
         self
     }
 
-    pub async fn mock_effects_processing(&self, effects: HashMap<&str, &str>) -> &Self {
-        let mut query_matchers = Vec::new();
-
-        for (effect, value) in effects {
-            query_matchers.push(query_param(effect, value));
+    pub async fn mock_effects_processing(&self, _effects: HashMap<&str, &str>) -> &Self {
+        for verb in ["GET", "HEAD"] {
+            Mock::given(method(verb))
+                .and(path_regex(r"/unsafe/.*"))
+                .respond_with(
+                    ResponseTemplate::new(200)
+                        .insert_header("content-type", "audio/mpeg")
+                        .set_body_raw("mock-processed-audio-with-effects", "audio/mpeg"),
+                )
+                .mount(&self.server)
+                .await;
         }
-
-        let mut mock_builder = Mock::given(method("GET")).and(path_regex(r"/unsafe/.*"));
-
-        for matcher in query_matchers {
-            mock_builder = mock_builder.and(matcher);
-        }
-
-        mock_builder
-            .respond_with(
-                ResponseTemplate::new(200)
-                    .insert_header("content-type", "audio/mpeg")
-                    .set_body_raw("mock-processed-audio-with-effects", "audio/mpeg"),
-            )
-            .mount(&self.server)
-            .await;
 
         self
     }
@@ -248,12 +254,69 @@ impl StreamingEngineMockServer {
 
         if let Some(last_request) = received_requests.last() {
             let url = last_request.url.clone();
+            let query_pairs: Vec<(String, String)> =
+                url.query_pairs().map(|(k, v)| (k.into_owned(), v.into_owned())).collect();
 
+            // Prefer checking the encoded parameter payload if present
+            if let Some(encoded_value) = url
+                .query_pairs()
+                .find(|(key, _)| key == "encoded")
+                .map(|(_, value)| value.to_string())
+            {
+                if let Ok(decoded) = general_purpose::URL_SAFE_NO_PAD.decode(&encoded_value) {
+                    if let Ok(json_value) = serde_json::from_slice::<Value>(&decoded) {
+                        for (effect, expected_value) in expected_effects {
+                            // First look in encoded payload
+                            if let Some(match_val) = json_value.get(*effect) {
+                                match match_val {
+                                    Value::Bool(val) => {
+                                        if (*val && *expected_value != "true")
+                                            || (!*val && *expected_value != "false")
+                                        {
+                                            return false;
+                                        }
+                                    }
+                                    Value::Number(num) => {
+                                        if num.to_string() != *expected_value {
+                                            return false;
+                                        }
+                                    }
+                                    Value::String(val) => {
+                                        if val != expected_value {
+                                            return false;
+                                        }
+                                    }
+                                    _ => return false,
+                                }
+                                continue;
+                            }
+
+                            // Then look at raw query params for explicit overrides (e.g. speed/volume)
+                            if let Some(actual_value) = query_pairs
+                                .iter()
+                                .find(|(k, _)| k == effect)
+                                .map(|(_, v)| v.clone())
+                            {
+                                if &actual_value != expected_value {
+                                    return false;
+                                }
+                                continue;
+                            }
+
+                            // If not found anywhere, fail
+                            return false;
+                        }
+                        return true;
+                    }
+                }
+            }
+
+            // Fallback to checking raw query params if no encoded payload was found
             for (effect, expected_value) in expected_effects {
-                if let Some(actual_value) = url
-                    .query_pairs()
-                    .find(|(key, _)| key == effect)
-                    .map(|(_, value)| value.to_string())
+                if let Some(actual_value) = query_pairs
+                    .iter()
+                    .find(|(k, _)| k == effect)
+                    .map(|(_, v)| v.clone())
                 {
                     if &actual_value != expected_value {
                         return false;

@@ -1,6 +1,7 @@
 use crate::error::{AppError, Result};
 use crate::services::claude::ClaudeService;
 use base64::{Engine as _, engine::general_purpose};
+use serde_json::json;
 use reqwest::{Client, Url};
 use serde_json::Value;
 
@@ -496,12 +497,17 @@ mod tests {
     use super::*;
     use serde_json::json;
 
+    fn test_service() -> StreamingEngineService {
+        let client = reqwest::Client::builder()
+            .no_proxy()
+            .build()
+            .expect("build test client");
+        StreamingEngineService::new(client, "http://localhost:8080".to_string())
+    }
+
     #[test]
     fn test_encode_parameters_object() {
-        let service = StreamingEngineService::new(
-            reqwest::Client::new(),
-            "http://localhost:8080".to_string(),
-        );
+        let service = test_service();
 
         let mut params = serde_json::Map::new();
         params.insert("format".to_string(), Value::String("wav".to_string()));
@@ -531,10 +537,7 @@ mod tests {
 
     #[test]
     fn test_separate_parameters() {
-        let service = StreamingEngineService::new(
-            reqwest::Client::new(),
-            "http://localhost:8080".to_string(),
-        );
+        let service = test_service();
 
         let params = json!({
             "audio_name": "track.mp3",
@@ -563,10 +566,7 @@ mod tests {
 
     #[test]
     fn test_build_encoded_query_params_empty() {
-        let service = StreamingEngineService::new(
-            reqwest::Client::new(),
-            "http://localhost:8080".to_string(),
-        );
+        let service = test_service();
 
         let empty_params = json!({});
         let result = service.build_encoded_query_params(&empty_params).unwrap();
@@ -581,10 +581,7 @@ mod tests {
 
     #[test]
     fn test_build_encoded_query_params_mixed() {
-        let service = StreamingEngineService::new(
-            reqwest::Client::new(),
-            "http://localhost:8080".to_string(),
-        );
+        let service = test_service();
 
         let params = json!({
             "audio_name": "track.mp3",
@@ -609,10 +606,7 @@ mod tests {
 
     #[test]
     fn test_apply_effect_presets() {
-        let service = StreamingEngineService::new(
-            reqwest::Client::new(),
-            "http://localhost:8080".to_string(),
-        );
+        let service = test_service();
 
         let params = json!({
             "audio_name": "track.mp3",
@@ -633,7 +627,10 @@ mod tests {
         // This test demonstrates the complete encoded parameters workflow
 
         let service = StreamingEngineService::new(
-            reqwest::Client::new(),
+            reqwest::Client::builder()
+                .no_proxy()
+                .build()
+                .expect("build test client"),
             "http://localhost:8080".to_string(),
         );
 
@@ -681,10 +678,7 @@ mod tests {
         // This test verifies that the gateway service produces encoded parameters
         // that are compatible with the streaming engine's expectations
 
-        let service = StreamingEngineService::new(
-            reqwest::Client::new(),
-            "http://localhost:8080".to_string(),
-        );
+        let service = test_service();
 
         // Create a parameter set that includes various types
         let params = json!({

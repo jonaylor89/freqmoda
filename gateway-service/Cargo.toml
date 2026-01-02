@@ -9,7 +9,7 @@ axum = "0.8.4"
 tokio = { version = "1.0", features = ["full"] }
 serde = "1.0.210"
 serde_json = "1.0"
-reqwest = { version = "0.11", features = ["json"] }
+reqwest = { version = "0.11", default-features = false, features = ["json", "rustls-tls", "gzip"] }
 sqlx = { version = "0.7", features = [
     "runtime-tokio-rustls",
     "postgres",

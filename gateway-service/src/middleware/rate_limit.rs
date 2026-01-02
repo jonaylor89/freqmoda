@@ -18,6 +18,9 @@ pub async fn rate_limit_middleware(
     request: Request,
     next: Next,
 ) -> Result<Response, StatusCode> {
+    if std::env::var("DISABLE_RATE_LIMIT").is_ok() {
+        return Ok(next.run(request).await);
+    }
     let ip = addr.ip().to_string();
     let session_id = request
         .extensions()

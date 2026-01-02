@@ -57,11 +57,11 @@ impl IntoResponse for AppError {
             AppError::Validation(ref msg) => (StatusCode::BAD_REQUEST, msg.as_str()),
             AppError::Claude(ref msg) => {
                 tracing::error!("Claude API error: {}", msg);
-                (StatusCode::BAD_GATEWAY, "AI service error")
+                (StatusCode::INTERNAL_SERVER_ERROR, "AI service error")
             }
             AppError::StreamingEngine(ref msg) => {
                 tracing::error!("Streaming engine error: {}", msg);
-                (StatusCode::BAD_GATEWAY, "Audio processing service error")
+                (StatusCode::INTERNAL_SERVER_ERROR, "Audio processing service error")
             }
             AppError::NotFound(ref msg) => (StatusCode::NOT_FOUND, msg.as_str()),
             AppError::Internal(ref msg) => {

@@ -16,6 +16,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+    - name: Ensure Docker is running for testcontainers
+      run: sudo systemctl start docker
     - name: Install FFmpeg development libraries
       run: |
         sudo apt-get update
@@ -25,7 +27,11 @@ jobs:
     - name: Build
       run: cargo build --verbose
     - name: Run tests
-      run: cargo test --verbose
+      env:
+        DOCKER_HOST: unix:///var/run/docker.sock
+        TESTCONTAINERS_RYUK_DISABLED: "true" # ryuk can be blocked on some runners
+        TESTCONTAINERS_DOCKER_HOST_OVERRIDE: unix:///var/run/docker.sock
+      run: cargo test --workspace --verbose
     - name: Lint
       run: cargo clippy
     - name: Format
