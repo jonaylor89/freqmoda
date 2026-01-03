@@ -101,9 +101,7 @@ impl TestApp {
 
     // HTTP request helpers
     fn attach_connect_info(&self, mut request: Request<Body>) -> Request<Body> {
-        request
-            .extensions_mut()
-            .insert(ConnectInfo(self.address));
+        request.extensions_mut().insert(ConnectInfo(self.address));
         request
     }
 

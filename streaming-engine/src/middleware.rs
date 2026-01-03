@@ -52,9 +52,9 @@ pub async fn cache_middleware(
         let headers = req.headers();
 
         // Handle range request
-        if let Some(range) = headers.get(header::RANGE) {
-            if let Ok(range_str) = range.to_str() {
-                if let Some(range_val) = range_str.strip_prefix("bytes=") {
+        if let Some(range) = headers.get(header::RANGE)
+            && let Ok(range_str) = range.to_str()
+                && let Some(range_val) = range_str.strip_prefix("bytes=") {
                     let (start, end) = parse_range(range_val, total_size);
                     let length = end - start + 1;
 
@@ -85,8 +85,6 @@ pub async fn cache_middleware(
 
                     return Ok(res);
                 }
-            }
-        }
 
         // Return full content if no range request
         let res = Response::builder()

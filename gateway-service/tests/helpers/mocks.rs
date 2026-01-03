@@ -254,8 +254,10 @@ impl StreamingEngineMockServer {
 
         if let Some(last_request) = received_requests.last() {
             let url = last_request.url.clone();
-            let query_pairs: Vec<(String, String)> =
-                url.query_pairs().map(|(k, v)| (k.into_owned(), v.into_owned())).collect();
+            let query_pairs: Vec<(String, String)> = url
+                .query_pairs()
+                .map(|(k, v)| (k.into_owned(), v.into_owned()))
+                .collect();
 
             // Prefer checking the encoded parameter payload if present
             if let Some(encoded_value) = url
