@@ -465,19 +465,17 @@ impl Params {
     fn collect_filters(&self) -> Vec<String> {
         let mut filters = Vec::new();
 
-        if let Some(speed) = self.speed {
-            if speed != 1.0 {
+        if let Some(speed) = self.speed
+            && speed != 1.0 {
                 filters.push(format!("atempo={:.3}", speed));
             }
-        }
         if let Some(true) = self.reverse {
             filters.push("areverse".to_string());
         }
-        if let Some(volume) = self.volume {
-            if volume != 1.0 {
+        if let Some(volume) = self.volume
+            && volume != 1.0 {
                 filters.push(format!("volume={:.2}", volume));
             }
-        }
         if let Some(true) = self.normalize {
             let level = self.normalize_level.unwrap_or(-16.0);
             filters.push(format!("loudnorm=I={:.1}", level));

@@ -856,8 +856,8 @@ fn parse_structured_message(content: &str, base_url: &str) -> (String, Option<St
     tracing::debug!("Claude response content: {}", content);
 
     // Check if the message has the new structured format
-    if let (Some(text_start), Some(text_end)) = (content.find("<text>"), content.find("</text>")) {
-        if let (Some(url_start), Some(url_end)) =
+    if let (Some(text_start), Some(text_end)) = (content.find("<text>"), content.find("</text>"))
+        && let (Some(url_start), Some(url_end)) =
             (content.find("<sample_url>"), content.find("</sample_url>"))
         {
             // Extract text content
@@ -873,7 +873,6 @@ fn parse_structured_message(content: &str, base_url: &str) -> (String, Option<St
             );
             return (text_content, Some(sample_url));
         }
-    }
 
     // Claude is being stubborn - try to parse the old format and convert it to structured format
     if let Some(url) = extract_audio_url(content, base_url) {

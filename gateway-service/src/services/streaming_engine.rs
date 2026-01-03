@@ -1,7 +1,6 @@
 use crate::error::{AppError, Result};
 use crate::services::claude::ClaudeService;
 use base64::{Engine as _, engine::general_purpose};
-use serde_json::json;
 use reqwest::{Client, Url};
 use serde_json::Value;
 
@@ -287,11 +286,10 @@ impl StreamingEngineService {
 
                 if let Value::String(s) = value {
                     // Check if this is an effect that needs preset mapping
-                    if let Some(preset_map) = effect_presets.get(key) {
-                        if let Some(preset_value) = preset_map.get(&s.to_lowercase()) {
+                    if let Some(preset_map) = effect_presets.get(key)
+                        && let Some(preset_value) = preset_map.get(&s.to_lowercase()) {
                             *value = Value::String(preset_value.clone());
                         }
-                    }
                 }
             }
         }
@@ -468,8 +466,8 @@ impl StreamingEngineService {
                         }
                     }
                     // Handle option_ prefixed parameters
-                    else if key.starts_with("option_") {
-                        if let Some(option_value) = value.as_str() {
+                    else if key.starts_with("option_")
+                        && let Some(option_value) = value.as_str() {
                             // Create custom_options array if it doesn't exist
                             let options = params_json
                                 .entry("custom_options".to_string())
@@ -478,7 +476,6 @@ impl StreamingEngineService {
                                 options_arr.push(Value::String(option_value.to_string()));
                             }
                         }
-                    }
                 }
             }
         }

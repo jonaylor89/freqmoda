@@ -32,19 +32,17 @@ fn audio_format_to_output(format: AudioFormat, params: &Params) -> OutputFormat 
 fn collect_filters(params: &Params) -> Option<String> {
     let mut filters = Vec::new();
 
-    if let Some(speed) = params.speed {
-        if speed != 1.0 {
+    if let Some(speed) = params.speed
+        && speed != 1.0 {
             filters.push(format!("atempo={:.3}", speed));
         }
-    }
     if let Some(true) = params.reverse {
         filters.push("areverse".to_string());
     }
-    if let Some(volume) = params.volume {
-        if volume != 1.0 {
+    if let Some(volume) = params.volume
+        && volume != 1.0 {
             filters.push(format!("volume={:.2}", volume));
         }
-    }
     if let Some(true) = params.normalize {
         let level = params.normalize_level.unwrap_or(-16.0);
         filters.push(format!("loudnorm=I={:.1}", level));

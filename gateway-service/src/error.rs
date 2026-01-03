@@ -61,7 +61,10 @@ impl IntoResponse for AppError {
             }
             AppError::StreamingEngine(ref msg) => {
                 tracing::error!("Streaming engine error: {}", msg);
-                (StatusCode::INTERNAL_SERVER_ERROR, "Audio processing service error")
+                (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    "Audio processing service error",
+                )
             }
             AppError::NotFound(ref msg) => (StatusCode::NOT_FOUND, msg.as_str()),
             AppError::Internal(ref msg) => {

@@ -52,8 +52,8 @@ pub fn suffix_result_storage_hasher(p: &params::Params) -> String {
     let dot_idx = audio.rfind('.');
     let slash_idx = audio.rfind('/');
 
-    if let Some(dot_idx) = dot_idx {
-        if slash_idx.is_none_or(|idx| idx < dot_idx) {
+    if let Some(dot_idx) = dot_idx
+        && slash_idx.is_none_or(|idx| idx < dot_idx) {
             let ext = if let Some(format) = &p.format {
                 format!(".{}", format.to_string().to_lowercase())
             } else {
@@ -61,7 +61,6 @@ pub fn suffix_result_storage_hasher(p: &params::Params) -> String {
             };
             return format!("{}{}{}", &audio[..dot_idx], hash, ext);
         }
-    }
     format!("{}{}", audio, hash)
 }
 

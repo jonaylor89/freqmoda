@@ -25,8 +25,8 @@ fn main() {
         }
     };
 
-    let include_dir = env::var("FFMPEG_INCLUDE_DIR").unwrap_or_else(|_| include_dir);
-    let lib_dir = env::var("FFMPEG_LIB_DIR").unwrap_or_else(|_| lib_dir);
+    let include_dir = env::var("FFMPEG_INCLUDE_DIR").unwrap_or(include_dir);
+    let lib_dir = env::var("FFMPEG_LIB_DIR").unwrap_or(lib_dir);
 
     // Link FFmpeg libraries
     println!("cargo:rustc-link-search=native={}", lib_dir);

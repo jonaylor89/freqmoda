@@ -69,11 +69,9 @@ impl ChatSession {
         if let Some(conv_id_str) = response_json
             .get("conversation_id")
             .and_then(|v| v.as_str())
-        {
-            if let Ok(conv_id) = Uuid::parse_str(conv_id_str) {
+            && let Ok(conv_id) = Uuid::parse_str(conv_id_str) {
                 self.conversation_id = Some(conv_id);
             }
-        }
 
         // Extract the message from the response
         let message = response_json
