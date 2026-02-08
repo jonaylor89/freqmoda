@@ -489,21 +489,21 @@ impl AudioProcessor {
         let buffersink = get_filter("abuffersink")?;
 
         // Build abuffer args
-        let mut ch_layout_str = [0i8; 64];
+        let mut in_ch_layout_str = [0i8; 64];
         unsafe {
             av_channel_layout_describe(
                 decoder.ch_layout(),
-                ch_layout_str.as_mut_ptr(),
-                ch_layout_str.len(),
+                in_ch_layout_str.as_mut_ptr(),
+                in_ch_layout_str.len(),
             );
         }
-        let ch_layout = unsafe {
-            std::ffi::CStr::from_ptr(ch_layout_str.as_ptr())
+        let in_ch_layout = unsafe {
+            std::ffi::CStr::from_ptr(in_ch_layout_str.as_ptr())
                 .to_string_lossy()
                 .into_owned()
         };
 
-        let sample_fmt_name = unsafe {
+        let in_sample_fmt_name = unsafe {
             let name = av_get_sample_fmt_name(decoder.sample_fmt());
             std::ffi::CStr::from_ptr(name)
                 .to_string_lossy()
@@ -514,68 +514,47 @@ impl AudioProcessor {
             "time_base=1/{}:sample_rate={}:sample_fmt={}:channel_layout={}",
             decoder.sample_rate(),
             decoder.sample_rate(),
-            sample_fmt_name,
-            ch_layout
+            in_sample_fmt_name,
+            in_ch_layout
         );
 
         let buffersrc_ctx = graph.create_filter(buffersrc, "in", Some(&abuffer_args))?;
         let buffersink_ctx = graph.create_filter(buffersink, "out", None)?;
 
-        // Set output format on buffersink
-        let sample_fmts = [out_sample_fmt, AVSampleFormat::AV_SAMPLE_FMT_NONE];
-        check(
-            unsafe {
-                let opt_name = CString::new("sample_fmts").unwrap();
-                av_opt_set_bin(
-                    buffersink_ctx as *mut _,
-                    opt_name.as_ptr(),
-                    sample_fmts.as_ptr() as *const u8,
-                    std::mem::size_of::<AVSampleFormat>() as i32,
-                    AV_OPT_SEARCH_CHILDREN as i32,
-                )
-            },
-            "av_opt_set_bin (sample_fmts)",
-        )?;
+        // Build filter chain with explicit format conversion at the end
+        let out_sample_fmt_name = unsafe {
+            let name = av_get_sample_fmt_name(out_sample_fmt);
+            std::ffi::CStr::from_ptr(name)
+                .to_string_lossy()
+                .into_owned()
+        };
+        let mut out_ch_layout_str = [0i8; 64];
+        unsafe {
+            av_channel_layout_describe(
+                out_layout,
+                out_ch_layout_str.as_mut_ptr(),
+                out_ch_layout_str.len(),
+            );
+        }
+        let out_ch_layout = unsafe {
+            std::ffi::CStr::from_ptr(out_ch_layout_str.as_ptr())
+                .to_string_lossy()
+                .into_owned()
+        };
 
-        let sample_rates = [out_sample_rate, 0i32];
-        check(
-            unsafe {
-                let opt_name = CString::new("sample_rates").unwrap();
-                av_opt_set_bin(
-                    buffersink_ctx as *mut _,
-                    opt_name.as_ptr(),
-                    sample_rates.as_ptr() as *const u8,
-                    std::mem::size_of::<i32>() as i32,
-                    AV_OPT_SEARCH_CHILDREN as i32,
-                )
-            },
-            "av_opt_set_bin (sample_rates)",
-        )?;
+        let aformat_args = format!(
+            "sample_fmts={}:sample_rates={}:channel_layouts={}",
+            out_sample_fmt_name, out_sample_rate, out_ch_layout
+        );
 
-        check(
-            unsafe {
-                let opt_name = CString::new("ch_layouts").unwrap();
-                let mut layout_str = [0i8; 64];
-                av_channel_layout_describe(out_layout, layout_str.as_mut_ptr(), layout_str.len());
-                av_opt_set(
-                    buffersink_ctx as *mut _,
-                    opt_name.as_ptr(),
-                    layout_str.as_ptr(),
-                    AV_OPT_SEARCH_CHILDREN as i32,
-                )
-            },
-            "av_opt_set (ch_layouts)",
-        )?;
-
-        // Build filter chain
         let filter_str = if let Some(f) = filters {
             if f.is_empty() {
-                "anull".to_string()
+                format!("aformat={}", aformat_args)
             } else {
-                f.to_string()
+                format!("{},aformat={}", f, aformat_args)
             }
         } else {
-            "anull".to_string()
+            format!("aformat={}", aformat_args)
         };
 
         // Create in/out endpoints
