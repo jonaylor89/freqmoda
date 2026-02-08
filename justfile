@@ -47,16 +47,29 @@ dev-all:
     just dev-web-ui &
     wait
 
-# Initialize services and run both services in parallel
+# Initialize services and run both services in parallel with graceful teardown
 dev-full:
     #!/usr/bin/env bash
     echo "🚀 Initializing development services..."
     just init-services
     echo "✅ Services initialized. Starting applications..."
     sleep 2
-    trap 'kill 0' INT
+    
+    cleanup() {
+        echo -e "\n🛑 Gracefully tearing down..."
+        # Kill the background jobs (dev-web-ui and dev-streaming)
+        kill $(jobs -p) 2>/dev/null || true
+        # Stop docker services
+        just stop-services
+        echo "✅ Teardown complete"
+        exit 0
+    }
+
+    trap cleanup INT TERM
+    
     just dev-web-ui &
     just dev-streaming &
+    
     wait
 
 # Build the entire workspace
@@ -136,11 +149,21 @@ tree:
 # Stop all development services (Docker containers)
 stop-services:
     #!/usr/bin/env bash
-    echo "🛑 Stopping development services..."
-    docker ps --filter "name=redis" -q | xargs -r docker stop
-    docker ps --filter "name=postgres" -q | xargs -r docker stop
-    docker ps --filter "name=minio" -q | xargs -r docker stop
-    echo "✅ All development services stopped"
+    echo "🛑 Stopping and removing development services..."
+    docker ps -a --filter "name=redis" -q | xargs -r docker rm -f
+    docker ps -a --filter "name=postgres" -q | xargs -r docker rm -f
+    docker ps -a --filter "name=minio" -q | xargs -r docker rm -f
+    echo "✅ All development services cleaned up"
+
+# Teardown the development environment (apps and services)
+teardown:
+    #!/usr/bin/env bash
+    echo "🧨 Full teardown initiated..."
+    # Attempt to kill any orphaned cargo-watch processes related to this project
+    pkill -f "cargo-watch.*web-ui" || true
+    pkill -f "cargo-watch.*streaming-engine" || true
+    just stop-services
+    echo "✨ Environment cleaned"
 
 # Check status of development services
 status:

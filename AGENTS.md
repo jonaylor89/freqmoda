@@ -5,6 +5,8 @@
 - `just dev-web-ui` - Run web UI with auto-reload
 - `just dev-streaming` - Run streaming engine with auto-reload
 - `just dev-all` - Run both services with auto-reload in parallel
+- `just dev-full` - Initialize services and run both with auto-reload
+- `just teardown` - Gracefully stop all services and cleanup containers
 - `just build` - Build the workspace
 - `just test` - Run all tests
 - `just test-name <name>` - Run a specific test
