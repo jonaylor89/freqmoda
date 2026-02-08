@@ -4,4 +4,6 @@ pub mod file;
 pub mod gcs;
 #[cfg(feature = "s3")]
 pub mod s3;
-pub mod storage;
+mod backend;
+
+pub use backend::AudioStorage;

@@ -4,9 +4,9 @@
 
 I have successfully implemented the complete backend architecture as specified in the BackendDesignDoc.md, following the same architectural patterns and coding style as the streaming-engine. Here's what was built:
 
-### 🎯 Gateway Service (`gateway-service/`)
+### 🎯 Web UI (`web-ui/`)
 
-A fully-featured Rust-based gateway service that orchestrates communication between Claude AI and the streaming engine.
+A fully-featured Rust-based web UI service that orchestrates communication between Claude AI and the streaming engine.
 
 #### Features Implemented:
 - **Axum Web Framework**: High-performance async web server
@@ -28,7 +28,7 @@ A fully-featured Rust-based gateway service that orchestrates communication betw
 
 #### Architecture Components:
 ```
-gateway-service/
+web-ui/
 ├── src/
 │   ├── handlers/          # HTTP request handlers (chat, audio, health)
 │   ├── services/          # External service integrations (Claude, streaming engine)
@@ -69,7 +69,7 @@ Complete PostgreSQL schema with:
 
 # Run services
 ./scripts/dev.sh streaming    # Start streaming engine
-./scripts/dev.sh gateway      # Start gateway service
+./scripts/dev.sh web-ui       # Start web UI
 
 # Build and test
 cargo build --workspace
@@ -81,9 +81,9 @@ cargo test --workspace
 The system implements the exact flow described in the design doc:
 
 1. **User Input**: "Reverse Sample 1 and add echo"
-2. **Gateway**: Stores message, forwards to Claude with tool definitions
+2. **Web UI**: Stores message, forwards to Claude with tool definitions
 3. **Claude AI**: Identifies intent, calls `process_audio` tool
-4. **Audio Resolution**: Gateway resolves "Sample 1" to `sample1.mp3`
+4. **Audio Resolution**: Web UI resolves "Sample 1" to `sample1.mp3`
 5. **Processing**: Translates to streaming engine URL with effect presets
 6. **Response**: Returns processed audio URL to client
 7. **Persistence**: Stores conversation history in PostgreSQL
@@ -118,7 +118,7 @@ The backend is now ready for:
 
 Complete documentation provided:
 - **README.md**: Project overview and quick start
-- **gateway-service/README.md**: Detailed service documentation
+- **web-ui/README.md**: Detailed service documentation
 - **API Examples**: Ready-to-use curl commands
 - **Configuration Guide**: Environment and YAML configuration
 

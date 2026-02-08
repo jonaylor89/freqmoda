@@ -1,10 +1,9 @@
-use crate::cache::cache::AudioCache;
-use crate::cache::cache::Cache;
+use crate::cache::{AudioCache, Cache};
 use crate::config::{Settings, StorageClient};
 use crate::metrics::{setup_metrics_recorder, track_metrics};
 use crate::middleware::auth_middleware;
 use crate::middleware::cache_middleware;
-use crate::processor::processor::{AudioProcessor, Processor};
+use crate::processor::{AudioProcessor, Processor};
 use crate::routes::health::health_check;
 use crate::routes::meta::meta_handler;
 use crate::routes::params::params;
@@ -17,7 +16,7 @@ use crate::storage::file::FileStorage;
 use crate::storage::gcs::GCloudStorage;
 #[cfg(feature = "s3")]
 use crate::storage::s3::S3Storage;
-use crate::storage::storage::AudioStorage;
+use crate::storage::AudioStorage;
 use crate::tags::create_tags;
 use axum::extract::{MatchedPath, Request};
 use axum::middleware;

@@ -2233,61 +2233,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "gateway-service"
-version = "0.1.0"
-dependencies = [
- "askama",
- "askama_axum",
- "axum 0.8.4",
- "base64 0.22.1",
- "chrono",
- "claims",
- "clap",
- "color-eyre",
- "config",
- "criterion",
- "dotenvy",
- "fake",
- "futures",
- "hyper 1.6.0",
- "insta",
- "mockall 0.12.1",
- "once_cell",
- "pretty_assertions",
- "proptest",
- "quickcheck",
- "quickcheck_macros",
- "redis",
- "reqwest 0.11.27",
- "rstest",
- "rustls 0.23.27",
- "rustyline",
- "secrecy",
- "serde",
- "serde-aux",
- "serde_json",
- "serial_test",
- "sqlx",
- "tempfile",
- "testcontainers",
- "testcontainers-modules",
- "thiserror 1.0.69",
- "tokio",
- "tokio-test",
- "tower 0.4.13",
- "tower-http 0.5.2",
- "tower-test",
- "tracing",
- "tracing-bunyan-formatter",
- "tracing-log 0.2.0",
- "tracing-subscriber",
- "url",
- "urlencoding",
- "uuid",
- "wiremock",
-]
-
-[[package]]
 name = "generic-array"
 version = "0.14.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -6832,6 +6777,61 @@ checksum = "5a6580f308b1fad9207618087a65c04e7a10bc77e02c8e84e9b00dd4b12fa0bb"
 dependencies = [
  "js-sys",
  "wasm-bindgen",
+]
+
+[[package]]
+name = "web-ui"
+version = "0.1.0"
+dependencies = [
+ "askama",
+ "askama_axum",
+ "axum 0.8.4",
+ "base64 0.22.1",
+ "chrono",
+ "claims",
+ "clap",
+ "color-eyre",
+ "config",
+ "criterion",
+ "dotenvy",
+ "fake",
+ "futures",
+ "hyper 1.6.0",
+ "insta",
+ "mockall 0.12.1",
+ "once_cell",
+ "pretty_assertions",
+ "proptest",
+ "quickcheck",
+ "quickcheck_macros",
+ "redis",
+ "reqwest 0.11.27",
+ "rstest",
+ "rustls 0.23.27",
+ "rustyline",
+ "secrecy",
+ "serde",
+ "serde-aux",
+ "serde_json",
+ "serial_test",
+ "sqlx",
+ "tempfile",
+ "testcontainers",
+ "testcontainers-modules",
+ "thiserror 1.0.69",
+ "tokio",
+ "tokio-test",
+ "tower 0.4.13",
+ "tower-http 0.5.2",
+ "tower-test",
+ "tracing",
+ "tracing-bunyan-formatter",
+ "tracing-log 0.2.0",
+ "tracing-subscriber",
+ "url",
+ "urlencoding",
+ "uuid",
+ "wiremock",
 ]
 
 [[package]]

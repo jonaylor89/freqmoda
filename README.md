@@ -8,7 +8,7 @@ AI-powered audio processing chat application that lets users manipulate audio fi
 FreqModa consists of several integrated services:
 
 - **Streaming Engine**: Core audio processing server (Rust)
-- **Gateway Service**: AI chat orchestrator with Claude integration (Rust)
+- **Web UI**: AI chat orchestrator with Claude integration (Rust)
 - **MCP Server**: Model Context Protocol integration for direct LLM access (Node.js)
 
 ## Quick Start
@@ -32,20 +32,20 @@ Advanced audio processing server that handles real-time audio manipulation.
 
 [📖 Full Documentation](./streaming-engine/README.md)
 
-### Gateway Service (`gateway-service/`)
+### Web UI (`web-ui/`)
 
-Rust-based API gateway that orchestrates communication between Claude AI and the streaming engine.
+Rust-based web UI that orchestrates communication between OpenAI and the streaming engine.
 
 - **Port**: 9000
 - **Features**: Natural language processing, conversation management, audio processing orchestration
 - **Database**: PostgreSQL for conversation history
 - **AI**: Claude 3.5 Sonnet integration
 
-[📖 Full Documentation](./gateway-service/README.md)
+[📖 Full Documentation](./web-ui/README.md)
 
 ### Web Interface
 
-The gateway service includes a built-in web interface available at http://localhost:9000:
+The web UI includes a built-in web interface available at http://localhost:9000:
 
 - **Features**: Chat interface, audio playback, sample library
 - **Demo Mode**: Rate-limited for demonstration purposes
@@ -111,7 +111,7 @@ The system includes a pre-loaded library of 10 high-quality audio samples:
 freqmoda/
 ├── streaming-engine/          # Core audio processing server
 │   └── mcp-server/           # MCP integration for direct LLM access
-├── gateway-service/           # AI chat orchestrator  
+├── web-ui/                    # AI chat orchestrator  
 ├── mcp-server/               # Shared MCP artifacts
 ├── scripts/                  # Development utilities
 ├── docs/                     # Project documentation

@@ -27,12 +27,12 @@ fi
 
 echo ""
 
-# Check Gateway Service
-echo "🤖 Gateway Service:"
-GATEWAY_URL=$(gcloud run services describe gateway-service --region=$REGION --format="value(status.url)" --project=$PROJECT_ID 2>/dev/null || echo "")
-if [ ! -z "$GATEWAY_URL" ]; then
-    echo "   ✅ Deployed: $GATEWAY_URL"
-    if curl -f "$GATEWAY_URL/health" >/dev/null 2>&1; then
+# Check Web UI
+echo "🤖 Web UI:"
+WEB_UI_URL=$(gcloud run services describe web-ui --region=$REGION --format="value(status.url)" --project=$PROJECT_ID 2>/dev/null || echo "")
+if [ ! -z "$WEB_UI_URL" ]; then
+    echo "   ✅ Deployed: $WEB_UI_URL"
+    if curl -f "$WEB_UI_URL/health" >/dev/null 2>&1; then
         echo "   ✅ Health check: OK"
     else
         echo "   ❌ Health check: FAILED"
@@ -60,11 +60,11 @@ echo "   💡 Verify your Upstash connection manually"
 echo ""
 
 # Integration Test
-if [ ! -z "$GATEWAY_URL" ] && [ ! -z "$STREAMING_URL" ]; then
+if [ ! -z "$WEB_UI_URL" ] && [ ! -z "$STREAMING_URL" ]; then
     echo "🧪 Integration Test:"
     echo "   Testing chat endpoint..."
 
-    RESPONSE=$(curl -s -X POST "$GATEWAY_URL/api/chat" \
+    RESPONSE=$(curl -s -X POST "$WEB_UI_URL/api/chat" \
         -H "Content-Type: application/json" \
         -d '{"message": "Hello"}' 2>/dev/null || echo "")
 
@@ -80,9 +80,9 @@ echo "📋 Quick Access URLs:"
 if [ ! -z "$STREAMING_URL" ]; then
     echo "Streaming Engine: $STREAMING_URL"
 fi
-if [ ! -z "$GATEWAY_URL" ]; then
-    echo "Gateway Service:  $GATEWAY_URL"
-    echo "Web Interface:    $GATEWAY_URL"
+if [ ! -z "$WEB_UI_URL" ]; then
+    echo "Web UI:           $WEB_UI_URL"
+    echo "Web Interface:    $WEB_UI_URL"
 fi
 
 echo ""

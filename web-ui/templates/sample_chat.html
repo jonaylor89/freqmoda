@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ sample.title }} - Chat</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/wavesurfer.js@7"></script>
+    <style>
+        .chat-messages {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+        }
+        @keyframes thinking {
+            0%, 80%, 100% { transform: scale(0.6); opacity: 0.5; }
+            40% { transform: scale(1); opacity: 1; }
+        }
+        .thinking-dot {
+            animation: thinking 1.4s ease-in-out infinite both;
+        }
+        .thinking-dot:nth-child(1) { animation-delay: -0.32s; }
+        .thinking-dot:nth-child(2) { animation-delay: -0.16s; }
+        .thinking-dot:nth-child(3) { animation-delay: 0s; }
+    </style>
+</head>
+<body class="min-h-screen bg-gray-50 overflow-hidden">
+    <div class="h-screen flex flex-col">
+        <!-- Header -->
+        <header class="bg-white border-b border-gray-200 px-4 sm:px-6 py-3">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <a href="/" class="flex items-center space-x-2 px-3 py-2 rounded-lg border border-gray-200 hover:bg-gray-100 text-sm font-medium text-gray-700">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                        </svg>
+                        <span>Back</span>
+                    </a>
+                    <div class="hidden sm:block w-px h-6 bg-gray-300"></div>
+                    <h1 class="text-lg font-bold text-gray-900 truncate">{{ sample.title }}</h1>
+                </div>
+                <div class="text-sm text-gray-600">
+                    <span class="font-medium text-gray-900">{{ session_requests_remaining }}</span> left
+                </div>
+            </div>
+        </header>
+
+        <!-- Waveform -->
+        <div class="bg-white border-b border-gray-200 px-4 sm:px-6 py-4">
+            <div class="flex items-center space-x-4">
+                <button id="main-play-button"
+                        class="bg-green-600 hover:bg-green-700 text-white w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
+                        onclick="toggleMainAudio()">
+                    <svg id="play-icon" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M6.3 2.84A1.5 1.5 0 004 4.11v11.78a1.5 1.5 0 002.3 1.27l9.344-5.891a1.5 1.5 0 000-2.538L6.3 2.84z"/>
+                    </svg>
+                </button>
+                <div class="flex-1 min-w-0">
+                    <div id="current-version-metadata" class="text-sm text-gray-500 font-mono mb-1">00:00 / 00:00</div>
+                    <div id="main-waveform" class="rounded-lg border border-gray-200 bg-gray-50 min-h-[60px]">
+                        <div class="flex items-center justify-center h-[60px] text-gray-400 text-sm">Loading waveform...</div>
+                    </div>
+                </div>
+                <button class="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-lg border border-gray-200 text-sm"
+                        onclick="downloadAudio()">
+                    Download
+                </button>
+            </div>
+        </div>
+
+        <!-- Chat Messages -->
+        <div class="flex-1 flex flex-col min-h-0">
+            <div class="flex-1 overflow-hidden">
+                <div id="messages" class="h-full chat-messages overflow-y-auto px-4 sm:px-6 py-6 space-y-4">
+                    {% if messages.is_empty() %}
+                    <div class="flex items-center justify-center h-full">
+                        <div class="max-w-md text-center space-y-4">
+                            <h3 class="text-xl font-bold text-gray-900">Ready to transform {{ sample.title }}</h3>
+                            <p class="text-gray-500">Describe how you want to process this audio sample.</p>
+                            <div class="space-y-2 text-left">
+                                <p class="text-sm font-medium text-gray-600 mb-2">Try these examples:</p>
+                                <button onclick="fillExample('Reverse and add echo')"
+                                        class="w-full p-3 bg-white border border-gray-200 rounded-lg text-left hover:bg-gray-50 text-sm">
+                                    "Reverse and add echo"
+                                </button>
+                                <button onclick="fillExample('Make it play faster with a fade in')"
+                                        class="w-full p-3 bg-white border border-gray-200 rounded-lg text-left hover:bg-gray-50 text-sm">
+                                    "Make it play faster with a fade in"
+                                </button>
+                                <button onclick="fillExample('Add chorus effect')"
+                                        class="w-full p-3 bg-white border border-gray-200 rounded-lg text-left hover:bg-gray-50 text-sm">
+                                    "Add chorus effect"
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    {% for message in messages %}
+                    <div class="flex space-x-3 {% if message.role == "user" %}flex-row-reverse space-x-reverse{% endif %}">
+                        <div class="flex-shrink-0">
+                            <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold {% if message.role == "user" %}bg-indigo-500{% else %}bg-green-600{% endif %}">
+                                {% if message.role == "user" %}U{% else %}AI{% endif %}
+                            </div>
+                        </div>
+                        <div class="flex-1 max-w-[85%]">
+                            <div class="{% if message.role == "user" %}bg-indigo-500 text-white ml-auto{% else %}bg-white border border-gray-200 text-gray-800{% endif %} rounded-2xl px-4 py-3">
+                                <div class="text-sm">{{ message.content }}</div>
+                                {% if !message.audio_url.is_empty() %}
+                                <div class="mt-2 pt-2 border-t {% if message.role == "user" %}border-indigo-400{% else %}border-gray-100{% endif %}">
+                                    <div id="waveform-{{ loop.index }}" class="rounded bg-gray-50 min-h-[40px]"></div>
+                                    <div class="flex items-center space-x-2 mt-1">
+                                        <button onclick="toggleInlineAudio({{ loop.index }}, '{{ message.audio_url }}')"
+                                                class="text-xs {% if message.role == "user" %}text-indigo-200 hover:text-white{% else %}text-gray-500 hover:text-gray-700{% endif %}">
+                                            &#9654; Play
+                                        </button>
+                                        <span id="inline-time-{{ loop.index }}" class="text-xs {% if message.role == "user" %}text-indigo-200{% else %}text-gray-400{% endif %}"></span>
+                                    </div>
+                                </div>
+                                <div data-audio-url="{{ message.audio_url }}" style="display: none;"></div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+
+                    <!-- Thinking Indicator -->
+                    <div id="thinking-indicator" class="hidden flex space-x-3">
+                        <div class="flex-shrink-0">
+                            <div class="w-8 h-8 rounded-full flex items-center justify-center bg-green-600 text-white text-xs font-bold">AI</div>
+                        </div>
+                        <div class="bg-white border border-gray-200 rounded-2xl px-4 py-3">
+                            <div class="flex items-center space-x-2 text-gray-500">
+                                <span class="text-sm">Thinking</span>
+                                <div class="flex space-x-1">
+                                    <div class="thinking-dot w-1.5 h-1.5 bg-gray-400 rounded-full"></div>
+                                    <div class="thinking-dot w-1.5 h-1.5 bg-gray-400 rounded-full"></div>
+                                    <div class="thinking-dot w-1.5 h-1.5 bg-gray-400 rounded-full"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chat Input -->
+            <div class="border-t border-gray-200 bg-white p-4">
+                <form id="chat-form" class="{% if !redis_available %}opacity-50 pointer-events-none{% endif %}">
+                    <input type="hidden" name="sample_id" value="{{ sample.streaming_key }}">
+                    <div class="flex space-x-3">
+                        <input
+                            type="text"
+                            name="message"
+                            id="message-input"
+                            maxlength="2000"
+                            class="flex-1 px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none text-sm"
+                            placeholder="{% if !redis_available %}Chat temporarily unavailable...{% else %}Describe how to process {{ sample.title }}...{% endif %}"
+                            required
+                            {% if session_requests_remaining <= 0 %}disabled{% endif %}
+                            {% if !redis_available %}disabled{% endif %}
+                        >
+                        <button
+                            type="submit"
+                            id="send-button"
+                            class="bg-indigo-500 hover:bg-indigo-600 text-white px-5 py-2.5 rounded-xl text-sm font-medium"
+                            {% if session_requests_remaining <= 0 %}disabled{% endif %}
+                            {% if !redis_available %}disabled{% endif %}
+                        >
+                            <span id="send-text">{% if !redis_available %}Unavailable{% else %}Send{% endif %}</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentWavesurfer = null;
+        let currentAudioUrl = null;
+        let isLoading = false;
+        const inlinePlayers = {};
+
+        function getLatestAudioUrl() {
+            const els = document.querySelectorAll('[data-audio-url]');
+            if (els.length > 0) return els[els.length - 1].getAttribute('data-audio-url');
+            return '{{ streaming_engine_base_url }}/unsafe/{{ sample.streaming_key }}';
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            if (typeof WaveSurfer === 'undefined') return;
+            const url = getLatestAudioUrl();
+            currentAudioUrl = url;
+            initMainWaveform(url);
+            scrollToBottom();
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const err = urlParams.get('error');
+            if (err === 'message_too_long') alert('Message too long. Keep it under 2000 characters.');
+            else if (err === 'redis_unavailable') alert('Service temporarily unavailable. Try again later.');
+            else if (err === 'quota_exceeded') alert('Daily message limit reached. Try again tomorrow.');
+            else if (err === 'chat_failed') alert('Error processing message. Please try again.');
+            if (err) window.history.replaceState({}, document.title, window.location.pathname);
+        });
+
+        function initMainWaveform(url) {
+            if (isLoading || !url) return;
+            isLoading = true;
+            const container = document.getElementById('main-waveform');
+            container.innerHTML = '';
+
+            if (currentWavesurfer) {
+                try { currentWavesurfer.destroy(); } catch (e) {}
+                currentWavesurfer = null;
+            }
+
+            currentWavesurfer = WaveSurfer.create({
+                container,
+                waveColor: '#6366f1',
+                progressColor: '#4f46e5',
+                cursorColor: '#ef4444',
+                barWidth: 3,
+                barRadius: 2,
+                height: 60,
+                normalize: true,
+                responsive: true
+            });
+
+            currentWavesurfer.on('ready', () => {
+                isLoading = false;
+                updateTime(0, currentWavesurfer.getDuration());
+            });
+
+            currentWavesurfer.on('timeupdate', (t) => {
+                updateTime(t, currentWavesurfer.getDuration());
+            });
+
+            currentWavesurfer.on('play', () => {
+                document.getElementById('play-icon').innerHTML = '<rect x="5" y="3" width="4" height="14"/><rect x="11" y="3" width="4" height="14"/>';
+            });
+
+            currentWavesurfer.on('pause', () => {
+                document.getElementById('play-icon').innerHTML = '<path d="M6.3 2.84A1.5 1.5 0 004 4.11v11.78a1.5 1.5 0 002.3 1.27l9.344-5.891a1.5 1.5 0 000-2.538L6.3 2.84z"/>';
+            });
+
+            currentWavesurfer.on('error', () => {
+                isLoading = false;
+                container.innerHTML = '<div class="flex items-center justify-center h-[60px] text-red-500 text-sm">Error loading audio</div>';
+            });
+
+            currentWavesurfer.load(url);
+        }
+
+        function toggleMainAudio() {
+            if (!currentWavesurfer || isLoading) return;
+            currentWavesurfer.isPlaying() ? currentWavesurfer.pause() : currentWavesurfer.play();
+        }
+
+        function updateTime(current, duration) {
+            document.getElementById('current-version-metadata').textContent = `${fmt(current)} / ${fmt(duration)}`;
+        }
+
+        function fmt(s) {
+            const m = Math.floor(s / 60);
+            const sec = Math.floor(s % 60);
+            return `${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
+        }
+
+        function downloadAudio() {
+            const url = currentAudioUrl || getLatestAudioUrl();
+            if (!url) return;
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `sample-${Date.now()}.mp3`;
+            a.click();
+        }
+
+        function toggleInlineAudio(index, url) {
+            if (inlinePlayers[index]) {
+                const p = inlinePlayers[index];
+                p.isPlaying() ? p.pause() : p.play();
+                return;
+            }
+            const container = document.getElementById('waveform-' + index);
+            if (!container) return;
+            container.innerHTML = '';
+            const ws = WaveSurfer.create({
+                container,
+                waveColor: '#9ca3af',
+                progressColor: '#6366f1',
+                height: 40,
+                barWidth: 2,
+                barRadius: 1,
+                normalize: true,
+                responsive: true
+            });
+            ws.on('ready', () => ws.play());
+            ws.on('timeupdate', (t) => {
+                const el = document.getElementById('inline-time-' + index);
+                if (el) el.textContent = `${fmt(t)} / ${fmt(ws.getDuration())}`;
+            });
+            ws.load(url);
+            inlinePlayers[index] = ws;
+        }
+
+        function fillExample(text) {
+            document.getElementById('message-input').value = text;
+            document.getElementById('message-input').focus();
+        }
+
+        function scrollToBottom() {
+            const el = document.getElementById('messages');
+            el.scrollTop = el.scrollHeight;
+        }
+
+        function addMessageToUI(role, content) {
+            const el = document.getElementById('messages');
+            const div = document.createElement('div');
+            div.className = `flex space-x-3 ${role === 'user' ? 'flex-row-reverse space-x-reverse' : ''}`;
+            const bgClass = role === 'user' ? 'bg-indigo-500 text-white ml-auto' : 'bg-white border border-gray-200 text-gray-800';
+            const avatarClass = role === 'user' ? 'bg-indigo-500' : 'bg-green-600';
+            const label = role === 'user' ? 'U' : 'AI';
+            div.innerHTML = `
+                <div class="flex-shrink-0">
+                    <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold ${avatarClass}">${label}</div>
+                </div>
+                <div class="flex-1 max-w-[85%]">
+                    <div class="${bgClass} rounded-2xl px-4 py-3"><div class="text-sm">${content}</div></div>
+                </div>`;
+            el.appendChild(div);
+            scrollToBottom();
+        }
+
+        document.getElementById('chat-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const input = document.getElementById('message-input');
+            const btn = document.getElementById('send-button');
+            const msg = input.value.trim();
+            if (!msg) return;
+            if (msg.length > 2000) { alert('Message too long (max 2000 chars).'); return; }
+            if (btn.disabled || input.disabled) return;
+
+            input.disabled = true;
+            btn.disabled = true;
+            btn.classList.add('opacity-75');
+            document.getElementById('send-text').textContent = 'Sending...';
+
+            addMessageToUI('user', msg);
+            input.value = '';
+            document.getElementById('thinking-indicator').classList.remove('hidden');
+            scrollToBottom();
+
+            try {
+                const body = new URLSearchParams();
+                body.append('message', msg);
+                body.append('sample_id', '{{ sample.streaming_key }}');
+                const res = await fetch('/sample/{{ sample.streaming_key }}/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body
+                });
+                if (res.ok) { window.location.reload(); }
+                else { throw new Error('Server error'); }
+            } catch (err) {
+                document.getElementById('thinking-indicator').classList.add('hidden');
+                alert('Failed to send message. Please try again.');
+            } finally {
+                input.disabled = false;
+                btn.disabled = false;
+                btn.classList.remove('opacity-75');
+                document.getElementById('send-text').textContent = 'Send';
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && currentWavesurfer) currentWavesurfer.pause();
+        });
+    </script>
+</body>
+</html>

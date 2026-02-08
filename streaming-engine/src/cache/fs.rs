@@ -1,4 +1,4 @@
-use super::cache::AudioCache;
+use super::AudioCache;
 use async_trait::async_trait;
 use color_eyre::Result;
 use std::fs;

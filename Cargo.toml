@@ -2,7 +2,7 @@
 members = [
     "crates/ffmpeg",
     "crates/ffmpeg-sys",
-    "gateway-service",
+    "web-ui",
     "streaming-engine",
 ]
 

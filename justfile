@@ -29,10 +29,10 @@ init-services:
     just init-redis
     # just init-minio
 
-# Run gateway service with auto-reload
-dev-gateway:
+# Run web UI with auto-reload
+dev-web-ui:
     #!/usr/bin/env bash
-    cd gateway-service && cargo watch -x 'run' -w src -w Cargo.toml -w config -w templates
+    cd web-ui && cargo watch -x 'run' -w src -w Cargo.toml -w config -w templates
 
 # Run streaming engine with auto-reload
 dev-streaming:
@@ -44,7 +44,7 @@ dev-all:
     #!/usr/bin/env bash
     trap 'kill 0' INT
     just dev-streaming &
-    just dev-gateway &
+    just dev-web-ui &
     wait
 
 # Initialize services and run both services in parallel
@@ -55,7 +55,7 @@ dev-full:
     echo "✅ Services initialized. Starting applications..."
     sleep 2
     trap 'kill 0' INT
-    just dev-gateway &
+    just dev-web-ui &
     just dev-streaming &
     wait
 
@@ -72,8 +72,8 @@ test:
     cargo test
 
 # Run tests for specific service
-test-gateway:
-    cargo test --package gateway-service
+test-web-ui:
+    cargo test --package web-ui
 
 test-streaming:
     cargo test --package streaming-engine
@@ -119,10 +119,10 @@ setup:
     just init-services
     just build
 
-# Run gateway service without auto-reload
-run-gateway:
+# Run web UI without auto-reload
+run-web-ui:
     #!/usr/bin/env bash
-    cd gateway-service && cargo run
+    cd web-ui && cargo run
 
 # Run streaming engine without auto-reload
 run-streaming:

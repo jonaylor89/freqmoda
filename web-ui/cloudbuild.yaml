@@ -1,0 +1,46 @@
+# Google Cloud Build configuration for web-ui service deployment
+steps:
+  # Build the container image
+  - name: "gcr.io/cloud-builders/docker"
+    args:
+      [
+        "build",
+        "-f",
+        "Dockerfile.web-ui",
+        "-t",
+        "gcr.io/$PROJECT_ID/web-ui:$COMMIT_SHA",
+        ".",
+      ]
+
+  # Push the container image to Container Registry
+  - name: "gcr.io/cloud-builders/docker"
+    args: ["push", "gcr.io/$PROJECT_ID/web-ui:$COMMIT_SHA"]
+
+  # Deploy container image to Cloud Run
+  - name: "gcr.io/cloud-builders/gcloud"
+    args:
+      - "run"
+      - "deploy"
+      - "web-ui"
+      - "--image"
+      - "gcr.io/$PROJECT_ID/web-ui:$COMMIT_SHA"
+      - "--region"
+      - "us-central1"
+      - "--platform"
+      - "managed"
+      - "--allow-unauthenticated"
+      - "--memory"
+      - "1Gi"
+      - "--cpu"
+      - "1"
+      - "--max-instances"
+      - "10"
+      - "--timeout"
+      - "900"
+      - "--port"
+      - "9000"
+      - "--set-env-vars"
+      - "APP_ENVIRONMENT=production"
+
+images:
+  - "gcr.io/$PROJECT_ID/web-ui:$COMMIT_SHA"

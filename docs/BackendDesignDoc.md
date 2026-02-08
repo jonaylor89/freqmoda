@@ -6,9 +6,9 @@ This document outlines the architecture and design decisions for integrating Aud
 
 ## Architecture Components
 
-### 1. Gateway Service
+### 1. Web UI
 
-A Rust-based gateway service that:
+A Rust-based web UI service that:
 - Provides a unified API endpoint for client applications
 - Orchestrates communication between Claude AI and the AudioStreamServer
 - Manages conversation state and history
@@ -19,7 +19,7 @@ A Rust-based gateway service that:
 ```
 +-----------------+     +---------------+     +------------------+
 |                 |     |               |     |                  |
-|  Client         +---->+  Gateway      +---->+  Claude AI       |
+|  Client         +---->+  Web UI       +---->+  Claude AI       |
 |  Application    |     |  Service      |     |  (Anthropic API) |
 |                 |     |               |     |                  |
 +-----------------+     +-------+-------+     +------------------+
@@ -119,7 +119,7 @@ Basic health check endpoint for monitoring.
 
 ### Tool Definition
 
-The gateway defines a tool for
+The web UI defines a tool for
  Claude to use for audio processing:
 
 ```json
@@ -161,7 +161,7 @@ The gateway defines a tool for
 
 ### Effect Presets
 
-To simplify interaction, the gateway maps simple effect descriptions to actual parameters:
+To simplify interaction, the web UI maps simple effect descriptions to actual parameters:
 
 ```rust
 // Examples of effect mappings
@@ -174,7 +174,7 @@ let echo_presets = HashMap::from([
 
 ## AudioStreamServer Integration
 
-The gateway translates Claude's tool calls into proper AudioStreamServer URLs:
+The web UI translates Claude's tool calls into proper AudioStreamServer URLs:
 
 1. Extract parameters from tool call
 2. Build query string with appropriate parameters
@@ -237,7 +237,7 @@ The system provides a public library of 10 high-quality audio samples stored on 
 The system is seeded with 10 high-quality audio samples:
 
 ```sql
--- Sample seed data (implemented in gateway-service/src/database.rs)
+-- Sample seed data (implemented in web-ui/src/database.rs)
 INSERT INTO audio_samples (streaming_key, title, duration, file_type) VALUES
 ('sample1.mp3', 'Sample 1', 8.0,  'audio/mpeg'),
 ('sample2.mp3', 'Sample 2', 12.5, 'audio/mpeg'),
@@ -321,7 +321,7 @@ You can select which environment to use by setting the `APP_ENVIRONMENT` environ
 
 
 2. **Integration with Monorepo**:
-   - Place gateway in appropriate directory
+   - Place web UI in appropriate directory
    - Update workspace configuration if needed
    - Share common libraries for auth, logging, etc.
 
@@ -351,15 +351,15 @@ You can select which environment to use by setting the `APP_ENVIRONMENT` environ
 ## Example Flow
 
 1. User sends: "Reverse Sample 1 and add echo"
-2. Gateway saves the message to PostgreSQL and forwards to Claude with tool definitions
+2. Web UI saves the message to PostgreSQL and forwards to Claude with tool definitions
 3. Claude identifies intent and calls `process_audio` tool
-4. Gateway looks up the sample in the `audio_samples` table by name
-5. Gateway translates the tool call to AudioStreamServer URL:
+4. Web UI looks up the sample in the `audio_samples` table by name
+5. Web UI translates the tool call to AudioStreamServer URL:
    ```
    http://audiostream-server:8080/unsafe/sample1.mp3?reverse=true&echo=0.8:0.88:60:0.4
    ```
-6. Gateway stores the processed audio information in the database
-7. Gateway returns Claude's response with the processed audio URL
+6. Web UI stores the processed audio information in the database
+7. Web UI returns Claude's response with the processed audio URL
 8. Client displays response and audio player with the URL
 9. Conversation history is persisted for future sessions
 

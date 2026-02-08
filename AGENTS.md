@@ -2,19 +2,19 @@
 
 ## Build & Test Commands
 - `just` - List available recipes
-- `just dev-gateway` - Run gateway service with auto-reload
+- `just dev-web-ui` - Run web UI with auto-reload
 - `just dev-streaming` - Run streaming engine with auto-reload
 - `just dev-all` - Run both services with auto-reload in parallel
 - `just build` - Build the workspace
 - `just test` - Run all tests
 - `just test-name <name>` - Run a specific test
-- `just test-gateway` - Run tests for gateway service
+- `just test-web-ui` - Run tests for web UI
 - `just lint` - Run linter (clippy)
 - `just fmt` - Format code
 - `just check` - Full check: format, lint, build, test
 
 ## Project Structure
-- **Workspace**: Multi-service Rust workspace with `gateway-service/` and `streaming-engine/`
+- **Workspace**: Multi-service Rust workspace with `web-ui/` and `streaming-engine/`
 - **Services**: Independent services with shared dependencies in workspace Cargo.toml
 - **Database**: PostgreSQL with SQLx migrations in `migrations/`
 

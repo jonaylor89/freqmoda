@@ -1,2 +1,4 @@
+mod core;
 pub mod ffmpeg;
-pub mod processor;
+
+pub use core::{AudioProcessor, Processor};

@@ -1,0 +1,58 @@
+FROM lukemathwalker/cargo-chef:latest-rust-1.87.0 AS chef
+
+WORKDIR /app
+
+RUN apt update && apt install lld clang -y
+
+# -----------------------------
+
+FROM chef AS planner
+
+COPY . .
+
+RUN cargo chef prepare --recipe-path recipe.json
+
+# -----------------------------
+
+FROM chef AS builder
+
+COPY --from=planner /app/recipe.json recipe.json
+
+RUN cargo chef cook --release --recipe-path recipe.json
+
+COPY . .
+
+RUN cargo build --release --bin web-ui --manifest-path ./web-ui/Cargo.toml
+
+# ----------------------------
+
+FROM debian:bookworm-slim AS runtime
+
+WORKDIR /app
+
+RUN apt-get update -y \
+    && apt-get install -y --no-install-recommends openssl ca-certificates curl \
+    # Clean up
+    && apt-get autoremove -y \
+    && apt-get clean -y \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=builder /app/target/release/web-ui web-ui
+
+# Create directories and copy files with fallbacks
+RUN mkdir -p config migrations templates static
+COPY --from=builder /app/web-ui/config ./config
+COPY --from=builder /app/migrations ./migrations
+COPY --from=builder /app/web-ui/templates ./templates
+COPY --from=builder /app/web-ui/static ./static
+
+ENV APP_ENVIRONMENT=production
+
+# Cloud Run expects the app to listen on 0.0.0.0:$PORT
+ENV WEB_UI_SERVER__HOST=0.0.0.0
+
+# Health check for Cloud Run
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:${PORT:-9000}/health || exit 1
+
+ENTRYPOINT ["./web-ui"]
