@@ -466,16 +466,18 @@ impl Params {
         let mut filters = Vec::new();
 
         if let Some(speed) = self.speed
-            && speed != 1.0 {
-                filters.push(format!("atempo={:.3}", speed));
-            }
+            && speed != 1.0
+        {
+            filters.push(format!("atempo={:.3}", speed));
+        }
         if let Some(true) = self.reverse {
             filters.push("areverse".to_string());
         }
         if let Some(volume) = self.volume
-            && volume != 1.0 {
-                filters.push(format!("volume={:.2}", volume));
-            }
+            && volume != 1.0
+        {
+            filters.push(format!("volume={:.2}", volume));
+        }
         if let Some(true) = self.normalize {
             let level = self.normalize_level.unwrap_or(-16.0);
             filters.push(format!("loudnorm=I={:.1}", level));

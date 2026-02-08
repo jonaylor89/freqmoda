@@ -1,11 +1,11 @@
-use web_ui::config::DatabaseSettings;
-use web_ui::database::get_connection_pool;
 use once_cell::sync::Lazy;
 use secrecy::SecretString;
 use sqlx::{PgPool, Row};
 use testcontainers::{Container, clients::Cli};
 use testcontainers_modules::postgres::Postgres;
 use uuid::Uuid;
+use web_ui::config::DatabaseSettings;
+use web_ui::database::get_connection_pool;
 
 static DOCKER: Lazy<Cli> = Lazy::new(Cli::default);
 

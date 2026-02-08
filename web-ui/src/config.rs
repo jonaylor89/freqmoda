@@ -19,7 +19,6 @@ pub struct Settings {
     pub openai: OpenAIConfig,
     pub streaming_engine: StreamingEngineConfig,
     pub redis: RedisConfig,
-
 }
 
 #[derive(Debug, Deserialize, Clone)]
@@ -124,6 +123,11 @@ pub fn get_configuration() -> Result<Settings, ConfigError> {
         .add_source(File::from(configuration_directory.join(environment.as_str())).required(true))
         .add_source(
             Environment::with_prefix("WEB_UI")
+                .prefix_separator("_")
+                .separator("__"),
+        )
+        .add_source(
+            Environment::with_prefix("OPENAI")
                 .prefix_separator("_")
                 .separator("__"),
         )

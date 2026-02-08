@@ -33,14 +33,15 @@ pub async fn session_middleware(mut request: Request, next: Next) -> Response {
 fn extract_or_create_session(headers: &HeaderMap) -> String {
     // Try to get session from cookie
     if let Some(cookie_header) = headers.get("cookie")
-        && let Ok(cookie_str) = cookie_header.to_str() {
-            for cookie in cookie_str.split(';') {
-                let cookie = cookie.trim();
-                if let Some(session_value) = cookie.strip_prefix("session_id=") {
-                    return session_value.to_string();
-                }
+        && let Ok(cookie_str) = cookie_header.to_str()
+    {
+        for cookie in cookie_str.split(';') {
+            let cookie = cookie.trim();
+            if let Some(session_value) = cookie.strip_prefix("session_id=") {
+                return session_value.to_string();
             }
         }
+    }
 
     // Generate new session ID
     Uuid::new_v4().to_string()
@@ -48,8 +49,9 @@ fn extract_or_create_session(headers: &HeaderMap) -> String {
 
 fn has_session_cookie(headers: &HeaderMap) -> bool {
     if let Some(cookie_header) = headers.get("cookie")
-        && let Ok(cookie_str) = cookie_header.to_str() {
-            return cookie_str.contains("session_id=");
-        }
+        && let Ok(cookie_str) = cookie_header.to_str()
+    {
+        return cookie_str.contains("session_id=");
+    }
     false
 }

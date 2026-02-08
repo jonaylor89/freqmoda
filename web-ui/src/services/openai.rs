@@ -1,5 +1,5 @@
 use crate::error::{AppError, Result};
-use crate::models::{OpenAIMessage, OpenAIRequest, OpenAIResponse, OpenAITool, OpenAIFunction};
+use crate::models::{OpenAIFunction, OpenAIMessage, OpenAIRequest, OpenAIResponse, OpenAITool};
 use reqwest::Client;
 use secrecy::{ExposeSecret, SecretString};
 use serde_json::json;
@@ -68,7 +68,10 @@ impl OpenAIService {
         let response = self
             .client
             .post(format!("{}/v1/chat/completions", self.base_url))
-            .header("Authorization", format!("Bearer {}", self.api_key.expose_secret()))
+            .header(
+                "Authorization",
+                format!("Bearer {}", self.api_key.expose_secret()),
+            )
             .header("Content-Type", "application/json")
             .json(&request)
             .send()

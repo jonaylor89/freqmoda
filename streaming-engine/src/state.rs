@@ -1,6 +1,4 @@
-use crate::{
-    cache::AudioCache, processor::AudioProcessor, storage::AudioStorage,
-};
+use crate::{cache::AudioCache, processor::AudioProcessor, storage::AudioStorage};
 use std::sync::Arc;
 
 #[derive(Clone)]

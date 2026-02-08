@@ -289,9 +289,10 @@ impl StreamingEngineService {
                 if let Value::String(s) = value {
                     // Check if this is an effect that needs preset mapping
                     if let Some(preset_map) = effect_presets.get(key)
-                        && let Some(preset_value) = preset_map.get(&s.to_lowercase()) {
-                            *value = Value::String(preset_value.clone());
-                        }
+                        && let Some(preset_value) = preset_map.get(&s.to_lowercase())
+                    {
+                        *value = Value::String(preset_value.clone());
+                    }
                 }
             }
         }
@@ -299,10 +300,7 @@ impl StreamingEngineService {
         Ok(processed)
     }
 
-    fn separate_parameters(
-        &self,
-        parameters: &Value,
-    ) -> Result<SeparatedParams> {
+    fn separate_parameters(&self, parameters: &Value) -> Result<SeparatedParams> {
         // Parameters that should be kept as explicit overrides (commonly changed)
         let explicit_override_params = ["format", "volume", "speed", "quality"];
 
@@ -469,15 +467,16 @@ impl StreamingEngineService {
                     }
                     // Handle option_ prefixed parameters
                     else if key.starts_with("option_")
-                        && let Some(option_value) = value.as_str() {
-                            // Create custom_options array if it doesn't exist
-                            let options = params_json
-                                .entry("custom_options".to_string())
-                                .or_insert_with(|| Value::Array(Vec::new()));
-                            if let Some(options_arr) = options.as_array_mut() {
-                                options_arr.push(Value::String(option_value.to_string()));
-                            }
+                        && let Some(option_value) = value.as_str()
+                    {
+                        // Create custom_options array if it doesn't exist
+                        let options = params_json
+                            .entry("custom_options".to_string())
+                            .or_insert_with(|| Value::Array(Vec::new()));
+                        if let Some(options_arr) = options.as_array_mut() {
+                            options_arr.push(Value::String(option_value.to_string()));
                         }
+                    }
                 }
             }
         }

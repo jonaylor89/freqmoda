@@ -166,10 +166,7 @@ pub async fn chat(
                 serde_json::from_str(&tc.function.arguments).unwrap_or_default();
             match tc.function.name.as_str() {
                 "process_audio" => {
-                    tracing::debug!(
-                        "Handling process_audio tool call with input: {:?}",
-                        input
-                    );
+                    tracing::debug!("Handling process_audio tool call with input: {:?}", input);
                     match handle_process_audio_tool(&state, &input).await {
                         Ok(processed_url) => {
                             tracing::info!("Successfully processed audio: {}", processed_url);
@@ -198,10 +195,7 @@ pub async fn chat(
                     }
                 }
                 "format_response" => {
-                    tracing::debug!(
-                        "Handling format_response tool call with input: {:?}",
-                        input
-                    );
+                    tracing::debug!("Handling format_response tool call with input: {:?}", input);
                     match handle_format_response_tool(&input).await {
                         Ok(formatted_response) => {
                             tracing::debug!("Successfully formatted response");

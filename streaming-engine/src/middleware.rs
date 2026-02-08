@@ -54,37 +54,38 @@ pub async fn cache_middleware(
         // Handle range request
         if let Some(range) = headers.get(header::RANGE)
             && let Ok(range_str) = range.to_str()
-                && let Some(range_val) = range_str.strip_prefix("bytes=") {
-                    let (start, end) = parse_range(range_val, total_size);
-                    let length = end - start + 1;
+            && let Some(range_val) = range_str.strip_prefix("bytes=")
+        {
+            let (start, end) = parse_range(range_val, total_size);
+            let length = end - start + 1;
 
-                    let content = Bytes::copy_from_slice(&buf[start..=end]);
+            let content = Bytes::copy_from_slice(&buf[start..=end]);
 
-                    let res = Response::builder()
-                        .status(StatusCode::PARTIAL_CONTENT)
-                        .header(header::CONTENT_TYPE, content_type)
-                        .header(header::ACCEPT_RANGES, "bytes")
-                        .header(header::CONTENT_LENGTH, length.to_string())
-                        .header(
-                            header::CONTENT_RANGE,
-                            format!("bytes {}-{}/{}", start, end, total_size),
-                        )
-                        .header(header::CACHE_CONTROL, "no-cache")
-                        .header(header::ACCESS_CONTROL_ALLOW_ORIGIN, "*")
-                        .header(
-                            header::CONTENT_DISPOSITION,
-                            HeaderValue::from_static("inline"),
-                        )
-                        .body(Body::from(content))
-                        .map_err(|e| {
-                            (
-                                StatusCode::INTERNAL_SERVER_ERROR,
-                                format!("Failed to build response: {}", e),
-                            )
-                        })?;
+            let res = Response::builder()
+                .status(StatusCode::PARTIAL_CONTENT)
+                .header(header::CONTENT_TYPE, content_type)
+                .header(header::ACCEPT_RANGES, "bytes")
+                .header(header::CONTENT_LENGTH, length.to_string())
+                .header(
+                    header::CONTENT_RANGE,
+                    format!("bytes {}-{}/{}", start, end, total_size),
+                )
+                .header(header::CACHE_CONTROL, "no-cache")
+                .header(header::ACCESS_CONTROL_ALLOW_ORIGIN, "*")
+                .header(
+                    header::CONTENT_DISPOSITION,
+                    HeaderValue::from_static("inline"),
+                )
+                .body(Body::from(content))
+                .map_err(|e| {
+                    (
+                        StatusCode::INTERNAL_SERVER_ERROR,
+                        format!("Failed to build response: {}", e),
+                    )
+                })?;
 
-                    return Ok(res);
-                }
+            return Ok(res);
+        }
 
         // Return full content if no range request
         let res = Response::builder()

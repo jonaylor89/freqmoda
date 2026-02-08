@@ -68,9 +68,7 @@ pub async fn index_page(State(state): State<AppState>) -> Result<Html<String>, S
         StatusCode::INTERNAL_SERVER_ERROR
     })?;
 
-    let template = IndexTemplate {
-        samples,
-    };
+    let template = IndexTemplate { samples };
 
     let html = template.render().map_err(|e| {
         error!("Failed to render index template: {:?}", e);
@@ -300,7 +298,6 @@ pub async fn sample_chat_form_handler(
                 error!("Failed to store assistant message: {:?}", e);
                 StatusCode::SERVICE_UNAVAILABLE
             })?;
-
         }
         Err(e) => {
             error!(
@@ -797,20 +794,20 @@ fn parse_structured_message(content: &str, base_url: &str) -> (String, Option<St
     if let (Some(text_start), Some(text_end)) = (content.find("<text>"), content.find("</text>"))
         && let (Some(url_start), Some(url_end)) =
             (content.find("<sample_url>"), content.find("</sample_url>"))
-        {
-            // Extract text content
-            let text_content = content[text_start + 6..text_end].trim().to_string();
+    {
+        // Extract text content
+        let text_content = content[text_start + 6..text_end].trim().to_string();
 
-            // Extract sample URL
-            let sample_url = content[url_start + 12..url_end].trim().to_string();
+        // Extract sample URL
+        let sample_url = content[url_start + 12..url_end].trim().to_string();
 
-            tracing::debug!(
-                "Parsed structured message - text: '{}', url: '{}'",
-                text_content,
-                sample_url
-            );
-            return (text_content, Some(sample_url));
-        }
+        tracing::debug!(
+            "Parsed structured message - text: '{}', url: '{}'",
+            text_content,
+            sample_url
+        );
+        return (text_content, Some(sample_url));
+    }
 
     // Claude is being stubborn - try to parse the old format and convert it to structured format
     if let Some(url) = extract_audio_url(content, base_url) {

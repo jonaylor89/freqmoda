@@ -177,13 +177,14 @@ async fn extract_metadata(audio: &AudioBuffer) -> Result<AudioMetadata, color_ey
 
     // Extract tags from audio stream
     if let Some(stream) = audio_stream
-        && let Some(tags) = stream.get("tags").and_then(|t| t.as_object()) {
-            for (key, value) in tags {
-                if let Some(value_str) = value.as_str() {
-                    metadata.tags.insert(key.clone(), value_str.to_string());
-                }
+        && let Some(tags) = stream.get("tags").and_then(|t| t.as_object())
+    {
+        for (key, value) in tags {
+            if let Some(value_str) = value.as_str() {
+                metadata.tags.insert(key.clone(), value_str.to_string());
             }
         }
+    }
 
     Ok(metadata)
 }

@@ -9,13 +9,13 @@ use axum::{
     extract::ConnectInfo,
     http::{Request, StatusCode},
 };
-use web_ui::{routes::create_router, state::AppState};
 use serde_json::Value;
 use std::net::SocketAddr;
 use std::sync::Arc;
 use tokio::net::TcpListener;
 use tower::ServiceExt;
 use uuid::Uuid;
+use web_ui::{routes::create_router, state::AppState};
 
 #[derive(Clone)]
 pub struct TestApp {

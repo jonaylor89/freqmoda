@@ -1,9 +1,9 @@
-use web_ui::config::{
-    DatabaseSettings, OpenAIConfig, RedisConfig, ServerConfig, Settings, StreamingEngineConfig,
-};
 use secrecy::{ExposeSecret, SecretString};
 use std::collections::HashMap;
 use tempfile::TempDir;
+use web_ui::config::{
+    DatabaseSettings, OpenAIConfig, RedisConfig, ServerConfig, Settings, StreamingEngineConfig,
+};
 
 pub struct TestConfigBuilder {
     server: Option<ServerConfig>,

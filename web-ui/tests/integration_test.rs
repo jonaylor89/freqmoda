@@ -2,13 +2,13 @@ mod helpers;
 
 use axum::http::StatusCode;
 
-use web_ui::config::*;
 use helpers::{
     config::TestConfigBuilder, database::TestDatabase, mocks::MockEnvironment, test_app::TestApp,
 };
 use secrecy::SecretString;
 use serde_json::{Value, json};
 use sqlx::Row;
+use web_ui::config::*;
 
 use tower::ServiceExt;
 use uuid::Uuid;
