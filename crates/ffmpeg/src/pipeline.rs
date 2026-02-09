@@ -186,6 +186,7 @@ impl AudioProcessor {
                 out_sample_fmt,
                 &out_layout,
                 opts.filters.as_deref(),
+                encoder.frame_size(),
             )?)
         } else {
             None
@@ -481,6 +482,7 @@ impl AudioProcessor {
         out_sample_fmt: AVSampleFormat,
         out_layout: &AVChannelLayout,
         filters: Option<&str>,
+        frame_size: i32,
     ) -> Result<(FilterGraph, *mut AVFilterContext, *mut AVFilterContext), FfmpegError> {
         let mut graph = FilterGraph::new()?;
 
@@ -520,6 +522,12 @@ impl AudioProcessor {
 
         let buffersrc_ctx = graph.create_filter(buffersrc, "in", Some(&abuffer_args))?;
         let buffersink_ctx = graph.create_filter(buffersink, "out", None)?;
+
+        if frame_size > 0 {
+            unsafe {
+                av_buffersink_set_frame_size(buffersink_ctx, frame_size as u32);
+            }
+        }
 
         // Build filter chain with explicit format conversion at the end
         let out_sample_fmt_name = unsafe {
