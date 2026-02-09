@@ -569,19 +569,22 @@ mod external_service_tests {
     use super::*;
 
     #[tokio::test]
-    async fn test_claude_mock_integration() {
+    async fn test_openai_mock_integration() {
         let mocks = MockEnvironment::new().await;
         mocks.setup_default_mocks().await;
 
         let client = reqwest::Client::new();
 
-        // Test successful Claude API call
+        // Test successful OpenAI API call
         let response = client
-            .post(format!("{}/v1/messages", mocks.get_claude_base_url()))
+            .post(format!(
+                "{}/v1/chat/completions",
+                mocks.get_openai_base_url()
+            ))
             .header("content-type", "application/json")
             .header("x-api-key", "test-api-key")
             .json(&json!({
-                "model": "claude-3-5-sonnet-20241022",
+                "model": "gpt-4o",
                 "max_tokens": 1000,
                 "messages": [
                     {
@@ -635,13 +638,16 @@ mod external_service_tests {
 
         let client = reqwest::Client::new();
 
-        // Test Claude error response
-        let claude_response = client
-            .post(format!("{}/v1/messages", mocks.get_claude_base_url()))
+        // Test OpenAI error response
+        let openai_response = client
+            .post(format!(
+                "{}/v1/chat/completions",
+                mocks.get_openai_base_url()
+            ))
             .header("content-type", "application/json")
             .header("x-api-key", "test-api-key")
             .json(&json!({
-                "model": "claude-3-5-sonnet-20241022",
+                "model": "gpt-4o",
                 "max_tokens": 1000,
                 "messages": [{"role": "user", "content": "Test"}]
             }))
@@ -649,7 +655,7 @@ mod external_service_tests {
             .await
             .expect("Failed to send request");
 
-        assert_eq!(claude_response.status(), 500);
+        assert_eq!(openai_response.status(), 500);
 
         // Test streaming engine error response
         let streaming_response = client
