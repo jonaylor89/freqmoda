@@ -1,0 +1,22 @@
+application:
+  host: 127.0.0.1
+  hmac_secret: "this-is-a-secret"
+
+storage:
+  base_dir: "uploads"
+  path_prefix: ""
+  safe_chars: "default"
+
+processor:
+  disabled_filters: []
+  max_filter_ops: 256
+  max_cache_files: 1000
+  max_cache_mem: 256
+  max_cache_size: 1024
+
+cache:
+  Filesystem:
+    base_dir: "cache"
+
+custom_tags:
+  env: local

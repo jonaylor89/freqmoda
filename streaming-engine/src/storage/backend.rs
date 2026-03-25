@@ -8,4 +8,7 @@ pub trait AudioStorage: Send + Sync {
     async fn get(&self, key: &str) -> Result<AudioBuffer>;
     async fn put(&self, key: &str, blob: &AudioBuffer) -> Result<()>;
     async fn delete(&self, key: &str) -> Result<()>;
+    async fn list(&self) -> Result<Vec<String>> {
+        Ok(vec![])
+    }
 }

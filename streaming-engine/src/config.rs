@@ -34,13 +34,15 @@ pub struct ApplicationSettings {
     #[serde(alias = "HOST")]
     pub host: String,
     pub hmac_secret: SecretString,
+    pub web_ui: bool,
 }
 
 impl Default for ApplicationSettings {
     fn default() -> Self {
         Self {
-            host: String::from("127.0.0.1"), // default host
-            hmac_secret: SecretString::from("this-is-a-secret".to_string()), // empty secret
+            host: String::from("127.0.0.1"),
+            hmac_secret: SecretString::from("this-is-a-secret".to_string()),
+            web_ui: false,
         }
     }
 }

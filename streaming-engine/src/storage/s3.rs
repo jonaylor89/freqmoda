@@ -67,6 +67,39 @@ impl AudioStorage for S3Storage {
 
         Ok(())
     }
+
+    #[tracing::instrument(skip(self))]
+    async fn list(&self) -> Result<Vec<String>> {
+        let mut keys = Vec::new();
+        let prefix = if self.path_prefix.is_empty() {
+            None
+        } else {
+            Some(self.path_prefix.as_str())
+        };
+
+        let mut request = self.client.list_objects_v2().bucket(&self.bucket);
+        if let Some(p) = prefix {
+            request = request.prefix(p);
+        }
+        let result = request.send().await?;
+
+        let prefix_len = self.path_prefix.len();
+        if let Some(contents) = result.contents {
+            for obj in contents {
+                if let Some(key) = obj.key {
+                    let stripped = if key.len() > prefix_len {
+                        key[prefix_len..].trim_start_matches('/').to_string()
+                    } else {
+                        key
+                    };
+                    if !stripped.is_empty() {
+                        keys.push(stripped);
+                    }
+                }
+            }
+        }
+        Ok(keys)
+    }
 }
 
 impl S3Storage {

@@ -25,8 +25,8 @@ pub async fn cache_middleware(
 ) -> Result<impl IntoResponse, (StatusCode, String)> {
     let params_hash = suffix_result_storage_hasher(&params);
 
-    let path = params.to_string();
-    let cache_key_prefix = if path.starts_with("/meta") {
+    let uri_path = req.uri().path();
+    let cache_key_prefix = if uri_path.starts_with("/meta") {
         META_CACHE_KEY_PREFIX
     } else {
         CACHE_KEY_PREFIX

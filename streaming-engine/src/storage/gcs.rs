@@ -7,6 +7,7 @@ use google_cloud_storage::client::{Client, ClientConfig};
 use google_cloud_storage::http::objects::delete::DeleteObjectRequest;
 use google_cloud_storage::http::objects::download::Range;
 use google_cloud_storage::http::objects::get::GetObjectRequest;
+use google_cloud_storage::http::objects::list::ListObjectsRequest;
 use google_cloud_storage::http::objects::upload::{Media, UploadObjectRequest, UploadType};
 use tracing::debug;
 
@@ -74,6 +75,39 @@ impl AudioStorage for GCloudStorage {
             })
             .await?;
         Ok(())
+    }
+
+    #[tracing::instrument(skip(self))]
+    async fn list(&self) -> Result<Vec<String>> {
+        let result = self
+            .client
+            .list_objects(&ListObjectsRequest {
+                bucket: self.bucket.clone(),
+                prefix: Some(self.path_prefix.clone()),
+                ..Default::default()
+            })
+            .await?;
+
+        let prefix_len = self.path_prefix.len();
+        let keys = result
+            .items
+            .unwrap_or_default()
+            .into_iter()
+            .filter_map(|obj| {
+                let name = obj.name;
+                let stripped = if name.len() > prefix_len {
+                    name[prefix_len..].trim_start_matches('/').to_string()
+                } else {
+                    name
+                };
+                if stripped.is_empty() {
+                    None
+                } else {
+                    Some(stripped)
+                }
+            })
+            .collect();
+        Ok(keys)
     }
 }
 

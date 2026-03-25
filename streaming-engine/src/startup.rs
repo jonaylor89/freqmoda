@@ -5,6 +5,7 @@ use crate::middleware::auth_middleware;
 use crate::middleware::cache_middleware;
 use crate::processor::{AudioProcessor, Processor};
 use crate::routes::health::health_check;
+use crate::routes::list::list_handler;
 use crate::routes::meta::meta_handler;
 use crate::routes::params::params;
 use crate::routes::root::root_handler;
@@ -48,6 +49,7 @@ impl Application {
         )?;
         let port = listener.local_addr()?.port();
 
+        let web_ui = config.application.web_ui;
         let additional_tags = create_tags(config.custom_tags)?;
 
         let processor = Processor::new(config.processor, additional_tags);
@@ -72,7 +74,7 @@ impl Application {
                 // Ensure bucket exists
                 storage.ensure_bucket_exists().await?;
 
-                run(listener, storage, processor, cache).await?
+                run(listener, storage, processor, cache, web_ui).await?
             }
             #[cfg(feature = "gcs")]
             Some(StorageClient::GCS(gcs_settings)) => {
@@ -85,7 +87,7 @@ impl Application {
                 )
                 .await;
 
-                run(listener, storage, processor, cache).await?
+                run(listener, storage, processor, cache, web_ui).await?
             }
             #[cfg(feature = "filesystem")]
             None => {
@@ -96,7 +98,7 @@ impl Application {
                     config.storage.safe_chars,
                 );
 
-                run(listener, storage, processor, cache).await?
+                run(listener, storage, processor, cache, web_ui).await?
             }
             #[cfg(not(any(feature = "s3", feature = "gcs", feature = "filesystem")))]
             _ => {
@@ -146,6 +148,7 @@ async fn run<S, P, C>(
     storage: S,
     processor: P,
     cache: C,
+    web_ui: bool,
 ) -> Result<Serve<TcpListener, Router, Router>>
 where
     S: AudioStorage + Clone + Send + Sync + 'static,
@@ -160,7 +163,7 @@ where
         cache: Arc::new(cache.clone()),
     };
 
-    let app = Router::new()
+    let mut app = Router::new()
         .route("/health", get(health_check))
         .route("/metrics", get(move || ready(recorder_handle.render())))
         .route("/openapi.json", get(crate::routes::openapi::openapi_json))
@@ -168,8 +171,16 @@ where
             "/api-schema",
             get(crate::routes::openapi::get_openapi_schema),
         )
-        .route("/", get(root_handler))
-        .route("/params/{*streamingpath}", get(params))
+        .route("/params/{*streamingpath}", get(params));
+
+    if web_ui {
+        info!("web UI enabled at /");
+        app = app
+            .route("/", get(root_handler))
+            .route("/list", get(list_handler));
+    }
+
+    let app = app
         .route_layer(middleware::from_fn(track_metrics))
         .merge(
             Router::new()

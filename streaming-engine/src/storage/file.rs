@@ -61,6 +61,24 @@ impl AudioStorage for FileStorage {
         tokio::fs::remove_file(full_path).await?;
         Ok(())
     }
+
+    #[tracing::instrument(skip(self))]
+    async fn list(&self) -> Result<Vec<String>> {
+        let dir = self.base_dir.join(Path::new(&self.path_prefix));
+        let mut keys = Vec::new();
+        if dir.is_dir() {
+            let mut entries = tokio::fs::read_dir(&dir).await?;
+            while let Some(entry) = entries.next_entry().await? {
+                if entry.file_type().await?.is_file() {
+                    if let Some(name) = entry.file_name().to_str() {
+                        keys.push(name.to_string());
+                    }
+                }
+            }
+        }
+        keys.sort();
+        Ok(keys)
+    }
 }
 
 impl FileStorage {
