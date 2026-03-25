@@ -29,10 +29,10 @@ init-services:
     just init-redis
     # just init-minio
 
-# Run web UI with auto-reload
-dev-web-ui:
+# Run web demo with auto-reload
+dev-web-demo:
     #!/usr/bin/env bash
-    cd web-ui && cargo watch -x 'run' -w src -w Cargo.toml -w config -w templates
+    cd web-demo && cargo watch -x 'run' -w src -w Cargo.toml -w config -w templates
 
 # Run streaming engine with auto-reload
 dev-streaming:
@@ -44,7 +44,7 @@ dev-all:
     #!/usr/bin/env bash
     trap 'kill 0' INT
     just dev-streaming &
-    just dev-web-ui &
+    just dev-web-demo &
     wait
 
 # Initialize services and run both services in parallel with graceful teardown
@@ -57,7 +57,7 @@ dev-full:
     
     cleanup() {
         echo -e "\n🛑 Gracefully tearing down..."
-        # Kill the background jobs (dev-web-ui and dev-streaming)
+        # Kill the background jobs (dev-web-demo and dev-streaming)
         kill $(jobs -p) 2>/dev/null || true
         # Stop docker services
         just stop-services
@@ -67,7 +67,7 @@ dev-full:
 
     trap cleanup INT TERM
     
-    just dev-web-ui &
+    just dev-web-demo &
     just dev-streaming &
     
     wait
@@ -85,8 +85,8 @@ test:
     cargo test
 
 # Run tests for specific service
-test-web-ui:
-    cargo test --package web-ui
+test-web-demo:
+    cargo test --package web-demo
 
 test-streaming:
     cargo test --package streaming-engine
@@ -132,10 +132,10 @@ setup:
     just init-services
     just build
 
-# Run web UI without auto-reload
-run-web-ui:
+# Run web demo without auto-reload
+run-web-demo:
     #!/usr/bin/env bash
-    cd web-ui && cargo run
+    cd web-demo && cargo run
 
 # Run streaming engine without auto-reload
 run-streaming:
@@ -160,7 +160,7 @@ teardown:
     #!/usr/bin/env bash
     echo "🧨 Full teardown initiated..."
     # Attempt to kill any orphaned cargo-watch processes related to this project
-    pkill -f "cargo-watch.*web-ui" || true
+    pkill -f "cargo-watch.*web-demo" || true
     pkill -f "cargo-watch.*streaming-engine" || true
     just stop-services
     echo "✨ Environment cleaned"

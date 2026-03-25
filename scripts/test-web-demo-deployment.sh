@@ -1,15 +1,15 @@
 #!/bin/bash
 
-echo "🧪 Testing Web UI Deployment Setup"
+echo "🧪 Testing Web Demo Deployment Setup"
 echo "=========================================="
 
 # Check if we're in the right directory
-if [ ! -d "web-ui" ]; then
+if [ ! -d "web-demo" ]; then
     echo "❌ Please run this script from the freqmoda root directory"
     exit 1
 fi
 
-cd web-ui
+cd web-demo
 
 # Test Rust build
 echo "📦 Testing Rust build..."
@@ -102,9 +102,9 @@ fi
 # Test Docker build (if Docker is available)
 if command -v docker &> /dev/null; then
     echo "🐳 Testing Docker build..."
-    if docker build -t web-ui-test . > /tmp/docker-build.log 2>&1; then
+    if docker build -t web-demo-test . > /tmp/docker-build.log 2>&1; then
         echo "✅ Docker build successful"
-        docker rmi web-ui-test >/dev/null 2>&1
+        docker rmi web-demo-test >/dev/null 2>&1
     else
         echo "❌ Docker build failed"
         echo "🔍 Last 10 lines of build output:"
@@ -118,7 +118,7 @@ fi
 cd ..
 
 echo ""
-echo "🎉 Web UI deployment test complete!"
+echo "🎉 Web Demo deployment test complete!"
 echo ""
 echo "Next steps:"
 echo "1. Ensure your config/production.yml has all required values:"
@@ -127,7 +127,7 @@ echo "   - Upstash Redis URL"
 echo "   - Claude API key"
 echo "   - Streaming engine URL"
 echo "2. Deploy to Cloud Run:"
-echo "   ./scripts/deploy-web-ui.sh YOUR_PROJECT_ID us-central1"
+echo "   ./scripts/deploy-web-demo.sh YOUR_PROJECT_ID us-central1"
 echo "3. Test deployed service:"
 echo "   curl https://your-service-url/health"
 echo "4. Access web interface:"

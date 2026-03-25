@@ -32,7 +32,7 @@ Advanced audio processing server that handles real-time audio manipulation.
 
 [📖 Full Documentation](./streaming-engine/README.md)
 
-### Web UI (`web-ui/`)
+### Web Demo (`web-demo/`)
 
 Rust-based web UI that orchestrates communication between OpenAI and the streaming engine.
 
@@ -41,7 +41,7 @@ Rust-based web UI that orchestrates communication between OpenAI and the streami
 - **Database**: PostgreSQL for conversation history
 - **AI**: Claude 3.5 Sonnet integration
 
-[📖 Full Documentation](./web-ui/README.md)
+[📖 Full Documentation](./web-demo/README.md)
 
 ### Web Interface
 
@@ -111,7 +111,7 @@ The system includes a pre-loaded library of 10 high-quality audio samples:
 freqmoda/
 ├── streaming-engine/          # Core audio processing server
 │   └── mcp-server/           # MCP integration for direct LLM access
-├── web-ui/                    # AI chat orchestrator  
+├── web-demo/                   # AI chat orchestrator  
 ├── mcp-server/               # Shared MCP artifacts
 ├── scripts/                  # Development utilities
 ├── docs/                     # Project documentation

@@ -15,7 +15,7 @@ use std::sync::Arc;
 use tokio::net::TcpListener;
 use tower::ServiceExt;
 use uuid::Uuid;
-use web_ui::{routes::create_router, state::AppState};
+use web_demo::{routes::create_router, state::AppState};
 
 #[derive(Clone)]
 pub struct TestApp {

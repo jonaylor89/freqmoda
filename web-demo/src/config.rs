@@ -122,7 +122,7 @@ pub fn get_configuration() -> Result<Settings, ConfigError> {
         .add_source(File::from(configuration_directory.join("base")).required(true))
         .add_source(File::from(configuration_directory.join(environment.as_str())).required(true))
         .add_source(
-            Environment::with_prefix("WEB_UI")
+            Environment::with_prefix("WEB_DEMO")
                 .prefix_separator("_")
                 .separator("__"),
         )

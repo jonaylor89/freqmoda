@@ -6780,7 +6780,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "web-ui"
+name = "web-demo"
 version = "0.1.0"
 dependencies = [
  "askama",

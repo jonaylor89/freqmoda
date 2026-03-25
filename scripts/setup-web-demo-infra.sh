@@ -5,7 +5,7 @@ set -e
 PROJECT_ID=${1:-"your-project-id"}
 REGION=${2:-"us-central1"}
 
-echo "🏗️  Setting up Web UI Infrastructure (External Services)"
+echo "🏗️  Setting up Web Demo Infrastructure (External Services)"
 echo "Project: $PROJECT_ID"
 echo "Region: $REGION"
 echo ""
@@ -22,13 +22,13 @@ gcloud services enable secretmanager.googleapis.com
 
 # Create service account
 echo "🔐 Creating service account..."
-SERVICE_ACCOUNT_NAME="web-ui"
+SERVICE_ACCOUNT_NAME="web-demo"
 SERVICE_ACCOUNT="$SERVICE_ACCOUNT_NAME@$PROJECT_ID.iam.gserviceaccount.com"
 
 if ! gcloud iam service-accounts describe $SERVICE_ACCOUNT --project=$PROJECT_ID >/dev/null 2>&1; then
     gcloud iam service-accounts create $SERVICE_ACCOUNT_NAME \
-        --display-name="Web UI Service Account" \
-        --description="Service account for Web UI Cloud Run deployment" \
+        --display-name="Web Demo Service Account" \
+        --description="Service account for Web Demo Cloud Run deployment" \
         --project=$PROJECT_ID
     echo "✅ Service account created"
 else
@@ -54,4 +54,4 @@ echo "3. Claude API key from Anthropic"
 echo "4. Deployed streaming engine instance"
 echo ""
 echo "🚀 Ready for deployment! Run:"
-echo "./scripts/deploy-web-ui.sh $PROJECT_ID $REGION"
+echo "./scripts/deploy-web-demo.sh $PROJECT_ID $REGION"

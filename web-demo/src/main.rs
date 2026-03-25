@@ -1,7 +1,7 @@
 use color_eyre::Result;
-use web_ui::config::get_configuration;
-use web_ui::startup::Application;
-use web_ui::telemetry::{get_subscriber, init_subscriber};
+use web_demo::config::get_configuration;
+use web_demo::startup::Application;
+use web_demo::telemetry::{get_subscriber, init_subscriber};
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -15,7 +15,7 @@ async fn main() -> Result<()> {
         .inspect_err(|e| tracing::error!("Failed to load configuration: {}", e))
         .expect("Failed to read configuration");
 
-    let subscriber = get_subscriber("web-ui".into(), "debug".into(), std::io::stdout);
+    let subscriber = get_subscriber("web-demo".into(), "debug".into(), std::io::stdout);
     init_subscriber(subscriber);
 
     let app = Application::build(configuration).await?;

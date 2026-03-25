@@ -1,7 +1,7 @@
 use secrecy::{ExposeSecret, SecretString};
 use std::collections::HashMap;
 use tempfile::TempDir;
-use web_ui::config::{
+use web_demo::config::{
     DatabaseSettings, OpenAIConfig, RedisConfig, ServerConfig, Settings, StreamingEngineConfig,
 };
 
@@ -81,7 +81,7 @@ pub fn default_test_database_config() -> DatabaseSettings {
         password: SecretString::new("password".to_string().into()),
         port: 5432,
         host: "localhost".to_string(),
-        database_name: "web_ui_test".to_string(),
+        database_name: "web_demo_test".to_string(),
         require_ssl: false,
     }
 }
@@ -163,7 +163,7 @@ database:
   password: "password"
   port: 5432
   host: "localhost"
-  database_name: "web_ui_test"
+  database_name: "web_demo_test"
   require_ssl: false
 
 openai:
@@ -187,27 +187,27 @@ pub fn create_test_env_vars() -> HashMap<String, String> {
     env_vars.insert("APP_ENVIRONMENT".to_string(), "test".to_string());
     env_vars.insert("PORT".to_string(), "0".to_string());
     env_vars.insert(
-        "WEB_UI_DATABASE__USERNAME".to_string(),
+        "WEB_DEMO_DATABASE__USERNAME".to_string(),
         "postgres".to_string(),
     );
     env_vars.insert(
-        "WEB_UI_DATABASE__PASSWORD".to_string(),
+        "WEB_DEMO_DATABASE__PASSWORD".to_string(),
         "password".to_string(),
     );
     env_vars.insert(
-        "WEB_UI_DATABASE__DATABASE_NAME".to_string(),
-        "web_ui_test".to_string(),
+        "WEB_DEMO_DATABASE__DATABASE_NAME".to_string(),
+        "web_demo_test".to_string(),
     );
     env_vars.insert(
-        "WEB_UI_DATABASE__REQUIRE_SSL".to_string(),
+        "WEB_DEMO_DATABASE__REQUIRE_SSL".to_string(),
         "false".to_string(),
     );
     env_vars.insert(
-        "WEB_UI_OPENAI__API_KEY".to_string(),
+        "WEB_DEMO_OPENAI__API_KEY".to_string(),
         "test-api-key".to_string(),
     );
     env_vars.insert(
-        "WEB_UI_OPENAI__BASE_URL".to_string(),
+        "WEB_DEMO_OPENAI__BASE_URL".to_string(),
         "http://localhost:3001".to_string(),
     );
 
@@ -278,7 +278,7 @@ mod tests {
 
         assert!(env_vars.contains_key("APP_ENVIRONMENT"));
         assert_eq!(env_vars.get("APP_ENVIRONMENT").unwrap(), "test");
-        assert!(env_vars.contains_key("WEB_UI_OPENAI__API_KEY"));
+        assert!(env_vars.contains_key("WEB_DEMO_OPENAI__API_KEY"));
     }
 
     #[test]

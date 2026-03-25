@@ -1,6 +1,6 @@
-# Web UI
+# Web Demo
 
-A Rust-based web UI that orchestrates communication between Claude AI and the Streaming Engine for audio processing through natural language chat.
+A Rust-based web demo that orchestrates communication between Claude AI and the Streaming Engine for audio processing through natural language chat.
 
 ## Features
 
@@ -55,8 +55,8 @@ cargo run
 APP_ENVIRONMENT=production cargo run
 
 # With environment variables
-WEB_UI_DATABASE__URL="postgresql://localhost:5432/freqmoda_dev" \
-WEB_UI_CLAUDE__API_KEY="your-api-key" \
+WEB_DEMO_DATABASE__URL="postgresql://localhost:5432/freqmoda_dev" \
+WEB_DEMO_CLAUDE__API_KEY="your-api-key" \
 cargo run
 ```
 
@@ -79,7 +79,7 @@ The service will start on `http://localhost:9000` by default.
 
 ## Web Chat Interface
 
-The web UI includes a built-in web interface for easy access to AI audio processing:
+The web demo includes a built-in web interface for easy access to AI audio processing:
 
 ### Quick Access
 
@@ -117,7 +117,7 @@ Try these sample requests to get started:
 
 ## CLI Chat Tool
 
-The web UI also includes a CLI tool for interactive chatting:
+The web demo also includes a CLI tool for interactive chatting:
 
 ### Building and Running
 
@@ -180,7 +180,7 @@ The service uses a layered configuration system:
 
 1. `config/base.yml` - Base configuration
 2. `config/{environment}.yml` - Environment-specific config
-3. Environment variables with `WEB_UI_` prefix
+3. Environment variables with `WEB_DEMO_` prefix
 
 ### Example: Chat Request
 
@@ -229,7 +229,7 @@ cargo tarpaulin
 ## Project Structure
 
 ```
-web-ui/
+web-demo/
 ├── src/
 │   ├── handlers/          # HTTP request handlers
 │   ├── services/          # External service integrations
@@ -246,7 +246,7 @@ web-ui/
 
 ## Integration with Streaming Engine
 
-The web UI acts as a bridge between natural language requests and the streaming engine's audio processing capabilities. It:
+The web demo acts as a bridge between natural language requests and the streaming engine's audio processing capabilities. It:
 
 1. Receives natural language requests via chat
 2. Uses Claude AI to understand intent and extract parameters
@@ -257,6 +257,6 @@ Sample flow:
 ```
 User: "Make Sample 1 play faster and add echo"
 Claude: Identifies audio_name="Sample 1", speed=1.5, echo="medium"
-Web UI: Translates to streaming engine URL
+Web Demo: Translates to streaming engine URL
 Result: http://localhost:8080/unsafe/sample1.mp3?speed=1.5&echo=0.8:0.88:60:0.4
 ```

@@ -1,6 +1,6 @@
-# Web UI Deployment
+# Web Demo Deployment
 
-Quick deployment guide for the FreqModa web UI to Google Cloud Run using existing config files.
+Quick deployment guide for the FreqModa web demo to Google Cloud Run using existing config files.
 
 ## Prerequisites
 
@@ -32,14 +32,14 @@ cd freqmoda
 export PROJECT_ID="your-google-cloud-project-id"
 
 # Deploy (uses existing config/production.yml)
-./scripts/deploy-web-ui.sh $PROJECT_ID us-central1
+./scripts/deploy-web-demo.sh $PROJECT_ID us-central1
 ```
 
 ### 2. Test Deployment
 
 ```bash
 # The script will output your service URL
-export SERVICE_URL="https://web-ui-xxxxx.run.app"
+export SERVICE_URL="https://web-demo-xxxxx.run.app"
 
 # Test health endpoint
 curl $SERVICE_URL/health
@@ -65,9 +65,9 @@ curl -X POST $SERVICE_URL/api/chat \
 If you prefer step-by-step deployment:
 
 ```bash
-cd web-ui
+cd web-demo
 
-gcloud run deploy web-ui \
+gcloud run deploy web-demo \
   --source . \
   --region us-central1 \
   --allow-unauthenticated \
@@ -77,7 +77,7 @@ gcloud run deploy web-ui \
   --timeout 300 \
   --port 9000 \
   --set-env-vars APP_ENVIRONMENT=production \
-  --set-env-vars WEB_UI_SERVER__HOST=0.0.0.0 \
+  --set-env-vars WEB_DEMO_SERVER__HOST=0.0.0.0 \
   --project $PROJECT_ID
 ```
 
@@ -92,7 +92,7 @@ The service uses these settings from your `config/production.yml`:
 
 ## Dependencies
 
-The web UI requires:
+The web demo requires:
 - **Streaming Engine**: Should be deployed first
 - **Supabase**: PostgreSQL database (configured in your config file)
 - **Upstash**: Redis instance (configured in your config file)
@@ -102,23 +102,23 @@ The web UI requires:
 
 ### View Logs
 ```bash
-gcloud run services logs tail web-ui --region=us-central1
+gcloud run services logs tail web-demo --region=us-central1
 ```
 
 ### Monitor Performance
 ```bash
 # View service details
-gcloud run services describe web-ui --region=us-central1
+gcloud run services describe web-demo --region=us-central1
 
 # Open Cloud Console monitoring
-open "https://console.cloud.google.com/run/detail/us-central1/web-ui/metrics?project=$PROJECT_ID"
+open "https://console.cloud.google.com/run/detail/us-central1/web-demo/metrics?project=$PROJECT_ID"
 ```
 
 ## Scaling
 
 ### Update Resources
 ```bash
-gcloud run services update web-ui \
+gcloud run services update web-demo \
   --memory 2Gi \
   --cpu 2 \
   --max-instances 20 \
@@ -138,19 +138,19 @@ gcloud run services update web-ui \
 **Service Won't Start**
 ```bash
 # Check recent logs for errors
-gcloud run services logs read web-ui --limit=50
+gcloud run services logs read web-demo --limit=50
 
 # Check service status
-gcloud run services describe web-ui --region=us-central1
+gcloud run services describe web-demo --region=us-central1
 ```
 
 **Config Files Missing**
 ```bash
 # Verify config files exist locally
-ls -la web-ui/config/
+ls -la web-demo/config/
 
 # Check .gcloudignore doesn't exclude config/
-cat web-ui/.gcloudignore | grep -v "^#" | grep config
+cat web-demo/.gcloudignore | grep -v "^#" | grep config
 ```
 
 **Database Connection Failed**
@@ -167,13 +167,13 @@ cat web-ui/.gcloudignore | grep -v "^#" | grep config
 
 ```bash
 # Test local build
-cd web-ui && cargo build --release
+cd web-demo && cargo build --release
 
 # Test Docker build locally
-docker build -t web-ui-test web-ui/
+docker build -t web-demo-test web-demo/
 
 # Check configuration loading
-cargo run --bin web-ui 2>&1 | grep -i config
+cargo run --bin web-demo 2>&1 | grep -i config
 
 # Test streaming engine connection
 curl https://your-streaming-engine-url/health
@@ -201,5 +201,5 @@ To update the service:
 3. New revision will be deployed automatically
 
 ```bash
-./scripts/deploy-web-ui.sh $PROJECT_ID us-central1
+./scripts/deploy-web-demo.sh $PROJECT_ID us-central1
 ```

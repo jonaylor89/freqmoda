@@ -237,7 +237,7 @@ The system provides a public library of 10 high-quality audio samples stored on 
 The system is seeded with 10 high-quality audio samples:
 
 ```sql
--- Sample seed data (implemented in web-ui/src/database.rs)
+-- Sample seed data (implemented in web-demo/src/database.rs)
 INSERT INTO audio_samples (streaming_key, title, duration, file_type) VALUES
 ('sample1.mp3', 'Sample 1', 8.0,  'audio/mpeg'),
 ('sample2.mp3', 'Sample 2', 12.5, 'audio/mpeg'),

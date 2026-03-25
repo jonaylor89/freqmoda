@@ -4,9 +4,9 @@ set -e
 
 PROJECT_ID=${1:-"your-project-id"}
 REGION=${2:-"us-central1"}
-SERVICE_NAME="web-ui"
+SERVICE_NAME="web-demo"
 
-echo "🚀 Deploying Web UI to Google Cloud Run"
+echo "🚀 Deploying Web Demo to Google Cloud Run"
 echo "Project: $PROJECT_ID"
 echo "Region: $REGION"
 echo ""
@@ -35,7 +35,7 @@ fi
 
 # Prepare Dockerfile for deployment
 echo "📦 Preparing Dockerfile..."
-cp Dockerfile.web-ui Dockerfile
+cp Dockerfile.web-demo Dockerfile
 
 # Deploy to Cloud Run
 echo "🚀 Deploying to Cloud Run..."
@@ -52,7 +52,7 @@ gcloud run deploy $SERVICE_NAME \
     --cpu-throttling \
     --execution-environment gen2 \
     --set-env-vars="APP_ENVIRONMENT=production" \
-    --set-env-vars="WEB_UI_SERVER__HOST=0.0.0.0" \
+    --set-env-vars="WEB_DEMO_SERVER__HOST=0.0.0.0" \
     --port=9000 \
     --project=$PROJECT_ID
 

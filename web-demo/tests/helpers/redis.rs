@@ -1,4 +1,4 @@
-//! TestRedis - Redis testing utilities for web-ui
+//! TestRedis - Redis testing utilities for web-demo
 //!
 //! This module provides a `TestRedis` struct that creates an isolated Redis instance
 //! for testing using Docker containers. It provides a clean, easy-to-use API for

@@ -673,7 +673,7 @@ mod tests {
 
     #[test]
     fn test_encoding_format_compatibility() {
-        // This test verifies that the web-ui service produces encoded parameters
+        // This test verifies that the web-demo service produces encoded parameters
         // that are compatible with the streaming engine's expectations
 
         let service = test_service();

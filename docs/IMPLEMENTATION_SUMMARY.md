@@ -4,7 +4,7 @@
 
 I have successfully implemented the complete backend architecture as specified in the BackendDesignDoc.md, following the same architectural patterns and coding style as the streaming-engine. Here's what was built:
 
-### 🎯 Web UI (`web-ui/`)
+### 🎯 Web Demo (`web-demo/`)
 
 A fully-featured Rust-based web UI service that orchestrates communication between Claude AI and the streaming engine.
 
@@ -28,7 +28,7 @@ A fully-featured Rust-based web UI service that orchestrates communication betwe
 
 #### Architecture Components:
 ```
-web-ui/
+web-demo/
 ├── src/
 │   ├── handlers/          # HTTP request handlers (chat, audio, health)
 │   ├── services/          # External service integrations (Claude, streaming engine)
@@ -69,7 +69,7 @@ Complete PostgreSQL schema with:
 
 # Run services
 ./scripts/dev.sh streaming    # Start streaming engine
-./scripts/dev.sh web-ui       # Start web UI
+./scripts/dev.sh web-demo     # Start web demo
 
 # Build and test
 cargo build --workspace
@@ -118,7 +118,7 @@ The backend is now ready for:
 
 Complete documentation provided:
 - **README.md**: Project overview and quick start
-- **web-ui/README.md**: Detailed service documentation
+- **web-demo/README.md**: Detailed service documentation
 - **API Examples**: Ready-to-use curl commands
 - **Configuration Guide**: Environment and YAML configuration
 

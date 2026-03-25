@@ -69,12 +69,12 @@ pub fn create_router(state: AppState) -> Router {
             get(|| async { axum::response::Redirect::permanent("/static/site.webmanifest") }),
         )
         .route(
-            "/og-image.png",
-            get(|| async { axum::response::Redirect::permanent("/static/og-image.png") }),
+            "/og-image.jpg",
+            get(|| async { axum::response::Redirect::permanent("/static/og-image.jpg") }),
         )
         .route(
-            "/twitter-card.png",
-            get(|| async { axum::response::Redirect::permanent("/static/twitter-card.png") }),
+            "/twitter-card.jpg",
+            get(|| async { axum::response::Redirect::permanent("/static/twitter-card.jpg") }),
         );
 
     Router::new()

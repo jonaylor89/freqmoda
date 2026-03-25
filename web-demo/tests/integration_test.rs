@@ -8,7 +8,7 @@ use helpers::{
 use secrecy::SecretString;
 use serde_json::{Value, json};
 use sqlx::Row;
-use web_ui::config::*;
+use web_demo::config::*;
 
 use tower::ServiceExt;
 use uuid::Uuid;
@@ -36,7 +36,7 @@ async fn test_configuration_parsing() {
         streaming_engine: StreamingEngineConfig {
             base_url: "http://localhost:9000".to_string(),
         },
-        redis: web_ui::config::RedisConfig {
+        redis: web_demo::config::RedisConfig {
             url: SecretString::from("redis://localhost:6379"),
         },
     };
@@ -712,7 +712,7 @@ mod error_handling_tests {
             .body(Body::from("invalid json {"))
             .expect("Failed to build request");
 
-        let router = web_ui::routes::create_router(app.state.as_ref().clone());
+        let router = web_demo::routes::create_router(app.state.as_ref().clone());
         let response = router
             .oneshot(request)
             .await
@@ -734,7 +734,7 @@ mod error_handling_tests {
             .body(Body::from(r#"{"message": "test"}"#))
             .expect("Failed to build request");
 
-        let router = web_ui::routes::create_router(app.state.as_ref().clone());
+        let router = web_demo::routes::create_router(app.state.as_ref().clone());
         let response = router
             .oneshot(request)
             .await

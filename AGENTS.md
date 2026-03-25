@@ -2,7 +2,7 @@
 
 ## Build & Test Commands
 - `just` - List available recipes
-- `just dev-web-ui` - Run web UI with auto-reload
+- `just dev-web-demo` - Run web demo with auto-reload
 - `just dev-streaming` - Run streaming engine with auto-reload
 - `just dev-all` - Run both services with auto-reload in parallel
 - `just dev-full` - Initialize services and run both with auto-reload
@@ -10,13 +10,13 @@
 - `just build` - Build the workspace
 - `just test` - Run all tests
 - `just test-name <name>` - Run a specific test
-- `just test-web-ui` - Run tests for web UI
+- `just test-web-demo` - Run tests for web demo
 - `just lint` - Run linter (clippy)
 - `just fmt` - Format code
 - `just check` - Full check: format, lint, build, test
 
 ## Project Structure
-- **Workspace**: Multi-service Rust workspace with `web-ui/` and `streaming-engine/`
+- **Workspace**: Multi-service Rust workspace with `web-demo/` and `streaming-engine/`
 - **Services**: Independent services with shared dependencies in workspace Cargo.toml
 - **Database**: PostgreSQL with SQLx migrations in `migrations/`
 
@@ -29,3 +29,4 @@
 - **Async**: Use `tokio::main` and async/await throughout
 - **Database**: Use SQLx with `FromRow` derive, parameterized queries
 - **API**: Use Axum with `State` extraction and `Json` responses
+s
