@@ -7,7 +7,7 @@ use axum::{
 use tracing::{info, instrument, warn};
 
 use crate::{
-    blob::AudioBuffer,
+    remote::fetch_audio_buffer,
     state::AppStateDyn,
     streamingpath::{hasher::suffix_result_storage_hasher, params::Params},
 };
@@ -34,27 +34,7 @@ pub async fn streamingpath_handler(
     }
 
     let blob = if params.key.starts_with("https://") || params.key.starts_with("http://") {
-        let raw_bytes = reqwest::get(&params.key)
-            .await
-            .map_err(|e| {
-                tracing::error!("Failed to fetch audio from URL {}: {}", params.key, e);
-                (
-                    StatusCode::NOT_FOUND,
-                    format!("Failed to fetch audio: {}", e),
-                )
-            })?
-            .bytes()
-            .await
-            .map_err(|e| {
-                tracing::error!("Failed to read bytes from URL {}: {}", params.key, e);
-                (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    format!("Failed to fetch audio: {}", e),
-                )
-            })?
-            .to_vec();
-
-        AudioBuffer::from_bytes(raw_bytes)
+        fetch_audio_buffer(&params.key).await?
     } else {
         state.storage.get(&params.key).await.map_err(|e| {
             tracing::error!("Failed to fetch audio from storage {}: {}", params.key, e);

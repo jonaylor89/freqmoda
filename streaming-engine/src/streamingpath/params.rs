@@ -194,6 +194,20 @@ impl FromStr for Params {
 }
 
 impl Params {
+    fn key_from_path(path: &str) -> Result<String> {
+        let raw_key = path
+            .trim_start_matches('/')
+            .split_once('/')
+            .map(|(_, key)| key)
+            .unwrap_or(path)
+            .trim_start_matches('/');
+
+        let decoded = urlencoding::decode(raw_key)
+            .map_err(|e| eyre::eyre!("Invalid encoded audio path: {}", e))?;
+
+        Ok(decoded.into_owned())
+    }
+
     /// Create Params from a path and query parameters.
     ///
     /// This method supports both traditional query parameters and encoded parameters.
@@ -221,11 +235,7 @@ impl Params {
     /// but `volume=0.8` and `reverse=true` (from encoded).
     pub fn from_path(path: String, query: HashMap<String, String>) -> Result<Self> {
         let mut base_params = Self {
-            key: path
-                .split("/")
-                .last()
-                .ok_or(eyre::eyre!("Invalid audio path"))?
-                .to_string(),
+            key: Self::key_from_path(&path)?,
             ..Default::default()
         };
 
@@ -233,11 +243,7 @@ impl Params {
         if let Some(encoded) = query.get("encoded") {
             base_params = Self::decode(encoded)?;
             // Keep the key from the path, not from the encoded params
-            base_params.key = path
-                .split("/")
-                .last()
-                .ok_or(eyre::eyre!("Invalid audio path"))?
-                .to_string();
+            base_params.key = Self::key_from_path(&path)?;
         }
 
         // Create a new params instance for explicit parameters
@@ -904,6 +910,28 @@ mod tests {
         let params = result.unwrap();
         assert_eq!(params.key, "test.mp3");
         assert_eq!(params.format, Some(AudioFormat::Mp3));
+    }
+
+    #[test]
+    fn test_from_path_preserves_nested_storage_keys() {
+        let params =
+            Params::from_path("unsafe/library/demo/test.mp3".to_string(), HashMap::new()).unwrap();
+
+        assert_eq!(params.key, "library/demo/test.mp3");
+    }
+
+    #[test]
+    fn test_from_path_decodes_encoded_remote_urls() {
+        let params = Params::from_path(
+            "unsafe/https%3A%2F%2Fcontent.audius.co%2Faudio%2Ftrack.mp3%3Ftoken%3Dabc".to_string(),
+            HashMap::new(),
+        )
+        .unwrap();
+
+        assert_eq!(
+            params.key,
+            "https://content.audius.co/audio/track.mp3?token=abc"
+        );
     }
 
     #[test]

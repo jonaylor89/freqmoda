@@ -4,6 +4,7 @@ pub mod config;
 pub mod metrics;
 pub mod middleware;
 pub mod processor;
+pub mod remote;
 pub mod routes;
 pub mod startup;
 pub mod state;
