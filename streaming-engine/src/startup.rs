@@ -10,7 +10,7 @@ use crate::routes::meta::meta_handler;
 use crate::routes::params::params;
 use crate::routes::root::root_handler;
 use crate::routes::streamingpath::streamingpath_handler;
-use crate::state::AppStateDyn;
+use crate::state::{AppStateDyn, WebConfig};
 use crate::storage::AudioStorage;
 #[cfg(feature = "filesystem")]
 use crate::storage::file::FileStorage;
@@ -50,6 +50,33 @@ impl Application {
         let port = listener.local_addr()?.port();
 
         let web_ui = config.application.web_ui;
+
+        let environment = std::env::var("APP_ENVIRONMENT").unwrap_or_else(|_| "local".into());
+        let storage_backend = match &config.storage.client {
+            Some(crate::config::StorageClient::S3(_)) => "s3",
+            Some(crate::config::StorageClient::GCS(_)) => "gcs",
+            None => "filesystem",
+        };
+        let cache_backend = match &config.cache {
+            crate::config::CacheSettings::Redis { .. } => "redis",
+            crate::config::CacheSettings::Filesystem(_) => "filesystem",
+        };
+        let web_config = if web_ui {
+            Some(WebConfig {
+                port,
+                host: config.application.host.clone(),
+                storage_backend: storage_backend.to_string(),
+                storage_base_dir: config.storage.base_dir.clone(),
+                storage_path_prefix: config.storage.path_prefix.clone(),
+                cache_backend: cache_backend.to_string(),
+                max_filter_ops: config.processor.max_filter_ops,
+                concurrency: config.processor.concurrency,
+                environment,
+            })
+        } else {
+            None
+        };
+
         let additional_tags = create_tags(config.custom_tags)?;
 
         let processor = Processor::new(config.processor, additional_tags);
@@ -74,7 +101,7 @@ impl Application {
                 // Ensure bucket exists
                 storage.ensure_bucket_exists().await?;
 
-                run(listener, storage, processor, cache, web_ui).await?
+                run(listener, storage, processor, cache, web_ui, web_config).await?
             }
             #[cfg(feature = "gcs")]
             Some(StorageClient::GCS(gcs_settings)) => {
@@ -87,7 +114,7 @@ impl Application {
                 )
                 .await;
 
-                run(listener, storage, processor, cache, web_ui).await?
+                run(listener, storage, processor, cache, web_ui, web_config).await?
             }
             #[cfg(feature = "filesystem")]
             None => {
@@ -98,7 +125,7 @@ impl Application {
                     config.storage.safe_chars,
                 );
 
-                run(listener, storage, processor, cache, web_ui).await?
+                run(listener, storage, processor, cache, web_ui, web_config).await?
             }
             #[cfg(not(any(feature = "s3", feature = "gcs", feature = "filesystem")))]
             _ => {
@@ -149,6 +176,7 @@ async fn run<S, P, C>(
     processor: P,
     cache: C,
     web_ui: bool,
+    web_config: Option<WebConfig>,
 ) -> Result<Serve<TcpListener, Router, Router>>
 where
     S: AudioStorage + Clone + Send + Sync + 'static,
@@ -161,6 +189,7 @@ where
         storage: Arc::new(storage.clone()),
         processor: Arc::new(processor),
         cache: Arc::new(cache.clone()),
+        web_config,
     };
 
     let mut app = Router::new()
