@@ -1,119 +1,22 @@
 
-# FreqModa
+# FreqModa (Archived)
 
-AI-powered audio processing chat application that lets users manipulate audio files through natural language conversations.
+> ⚠️ **This repository is archived.** The streaming engine — the core audio processing server — has moved to [**streaming-engine**](https://github.com/jonaylor89/streaming-engine).
 
-## Architecture
+FreqModa is an experimental AI-powered audio chat application built as a companion to [this blog post](https://jonaylor.com/blog/building-a-simple-ai-daw-part-2-mcp-and-agents/). It uses LLMs to orchestrate audio processing via natural language.
 
-FreqModa consists of several integrated services:
+👉 **[github.com/jonaylor89/streaming-engine](https://github.com/jonaylor89/streaming-engine)** — On-the-fly audio processing server (like Thumbor, but for audio)
 
-- **Streaming Engine**: Core audio processing server (Rust)
-- **Web UI**: AI chat orchestrator with Claude integration (Rust)
-- **MCP Server**: Model Context Protocol integration for direct LLM access (Node.js)
+## Prerequisites
+
+- Node.js 20+
+- A running [streaming-engine](https://github.com/jonaylor89/streaming-engine) instance on port 8080
+- An OpenAI API key
 
 ## Quick Start
 
-### Prerequisites
-
-- Rust 1.70+
-- Docker
-- Claude API key from Anthropic
-
-## Services
-
-### Streaming Engine (`streaming-engine/`)
-
-Advanced audio processing server that handles real-time audio manipulation.
-
-- **Port**: 8080
-- **Features**: Format conversion, effects, filters, time manipulation
-- **API**: RESTful with streaming support
-- **Storage**: Local, S3, GCS support
-
-[📖 Full Documentation](./streaming-engine/README.md)
-
-### Web Demo (`web-demo/`)
-
-Rust-based web UI that orchestrates communication between OpenAI and the streaming engine.
-
-- **Port**: 9000
-- **Features**: Natural language processing, conversation management, audio processing orchestration
-- **Database**: PostgreSQL for conversation history
-- **AI**: Claude 3.5 Sonnet integration
-
-[📖 Full Documentation](./web-demo/README.md)
-
-### Web Interface
-
-The web UI includes a built-in web interface available at http://localhost:9000:
-
-- **Features**: Chat interface, audio playback, sample library
-- **Demo Mode**: Rate-limited for demonstration purposes
-- **Responsive**: Works on desktop and mobile devices
-
-## API Examples
-
-### Chat with AI for Audio Processing
-
-```bash
-curl -X POST http://localhost:9000/api/chat \
-  -H "Content-Type: application/json" \
-  -d '{
-    "message": "Reverse Sample 1 and add a medium echo effect"
-  }'
-```
-
-### Direct Audio Processing
-
-```bash
-curl -X POST http://localhost:9000/api/audio/process \
-  -H "Content-Type: application/json" \
-  -d '{
-    "audio_name": "sample1.mp3",
-    "parameters": {
-      "reverse": true,
-      "echo": "medium",
-      "fade_in": 1.0
-    }
-  }'
-```
-
-### Streaming Engine Direct Access
-
-```bash
-# Process audio with effects
-curl "http://localhost:8080/unsafe/sample1.mp3?reverse=true&echo=0.8:0.88:60:0.4&fade_in=1"
-
-# Get audio metadata
-curl "http://localhost:8080/meta/unsafe/sample1.mp3"
-```
-
-## Audio Sample Library
-
-The system includes a pre-loaded library of 10 high-quality audio samples:
-
-- **Sample 1**
-- **Sample 2** 
-- **Sample 3**
-- **Sample 4** 
-- **Sample 5**
-- **Sample 6** 
-- **Sample 7** 
-- **Sample 8** 
-- **Sample 9**
-- **Sample 10**
-
-## Development
-
-### Project Structure
-
-```
-freqmoda/
-├── streaming-engine/          # Core audio processing server
-│   └── mcp-server/           # MCP integration for direct LLM access
-├── web-demo/                   # AI chat orchestrator  
-├── mcp-server/               # Shared MCP artifacts
-├── scripts/                  # Development utilities
-├── docs/                     # Project documentation
-└── migrations/               # Database schema migrations
+```sh
+cp .env.example .env   # Add your OPENAI_API_KEY
+npm install
+npm run dev
 ```

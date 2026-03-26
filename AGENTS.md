@@ -1,32 +1,24 @@
 # FreqModa Development Guide
 
+> **This repository is archived.** FreqModa is an experimental AI audio chat demo built for a [blog post](https://jonaylor.com/blog/building-a-simple-ai-daw-part-2-mcp-and-agents/). The core audio processing server lives at [streaming-engine](https://github.com/jonaylor89/streaming-engine).
+
 ## Build & Test Commands
-- `just` - List available recipes
-- `just dev-web-demo` - Run web demo with auto-reload
-- `just dev-streaming` - Run streaming engine with auto-reload
-- `just dev-all` - Run both services with auto-reload in parallel
-- `just dev-full` - Initialize services and run both with auto-reload
-- `just teardown` - Gracefully stop all services and cleanup containers
-- `just build` - Build the workspace
-- `just test` - Run all tests
-- `just test-name <name>` - Run a specific test
-- `just test-web-demo` - Run tests for web demo
-- `just lint` - Run linter (clippy)
-- `just fmt` - Format code
-- `just check` - Full check: format, lint, build, test
+- `just` — List available recipes
+- `just dev` — Run dev server with auto-reload
+- `just build` — Build for production
+- `just check` — Type check
+
+## External Dependencies
+- **[streaming-engine](https://github.com/jonaylor89/streaming-engine)** — audio processing server (must be running on port 8080)
+- **OpenAI API key** — set `OPENAI_API_KEY` in `.env`
 
 ## Project Structure
-- **Workspace**: Multi-service Rust workspace with `web-demo/` and `streaming-engine/`
-- **Services**: Independent services with shared dependencies in workspace Cargo.toml
-- **Database**: PostgreSQL with SQLx migrations in `migrations/`
+- `src/routes/` — Pages and API endpoints
+- `src/lib/` — Shared modules (types, samples, streaming engine client)
+- `scripts/` — Development utilities
 
 ## Code Style
-- **Imports**: Group std, external crates, then local modules
-- **Error Handling**: Use `color_eyre::Result`, `thiserror` for custom errors
-- **Logging**: Use `tracing` with structured logging and `#[instrument]` for functions
-- **Types**: Prefer explicit types, use `Uuid` for IDs, `DateTime<Utc>` for timestamps
-- **Naming**: snake_case for functions/variables, PascalCase for types, modules in snake_case
-- **Async**: Use `tokio::main` and async/await throughout
-- **Database**: Use SQLx with `FromRow` derive, parameterized queries
-- **API**: Use Axum with `State` extraction and `Json` responses
-s
+- **Framework**: SvelteKit 2 with Svelte 5 (runes)
+- **Styling**: Tailwind CSS v4
+- **TypeScript**: Strict mode
+- **State**: Svelte 5 runes (`$state`, `$derived`, `$props`)
