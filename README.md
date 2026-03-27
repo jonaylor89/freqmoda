@@ -7,6 +7,8 @@ FreqModa is an experimental AI-powered audio chat application built as a compani
 
 👉 **[github.com/jonaylor89/streaming-engine](https://github.com/jonaylor89/streaming-engine)** — On-the-fly audio processing server (like Thumbor, but for audio)
 
+[![Create a Simple Ai DAW, Part 2: MCP and Agents](https://img.youtube.com/vi/BGSBQDlbwb8/hqdefault.jpg)](https://www.youtube.com/watch?v=BGSBQDlbwb8)   
+
 ## Prerequisites
 
 - Node.js 20+
